@@ -8,7 +8,7 @@ module "acs" {
 }
 
 module "fargate_api" {
-  source = "github.com/byu-oit/terraform-aws-standard-fargate?ref=v2.1.0"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v2.1.0"
   //  source         = "../../" // for local testing
   app_name       = "example-api"
   container_port = 8000
@@ -46,7 +46,7 @@ module "fargate_api" {
   tags = {
     env              = "dev"
     data-sensitivity = "internal"
-    repo             = "https://github.com/byu-oit/terraform-aws-standard-fargate"
+    repo             = "https://github.com/byu-oit/terraform-aws-fargate-api"
   }
 }
 
