@@ -1,6 +1,6 @@
-![Latest GitHub Release](https://img.shields.io/github/v/release/byu-oit/terraform-aws-standard-fargate?sort=semver)
+![Latest GitHub Release](https://img.shields.io/github/v/release/byu-oit/terraform-aws-fargate-api?sort=semver)
 
-# Terraform AWS Standard Fargate
+# Terraform AWS Fargate API
 Terraform module pattern to build a standard Fargate API.
 
 This module creates a Fargate service with an ALB, AutoScaling, CodeDeploy configuration and a DNS record in front.
@@ -11,7 +11,7 @@ customized solution you may need to use this code more as a pattern or guideline
 ## Usage
 ```hcl
 module "my_app" {
-  source = "github.com/byu-oit/terraform-aws-standard-fargate?ref=v2.1.0"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v2.1.0"
   app_name       = "example-api"
   container_port = 8000
   primary_container_definition = {
@@ -44,7 +44,7 @@ module "my_app" {
   tags = {
     env              = "dev"
     data-sensitivity = "internal"
-    repo             = "https://github.com/byu-oit/terraform-aws-standard-fargate"
+    repo             = "https://github.com/byu-oit/terraform-aws-fargate-api"
   }
 }
 ```
@@ -263,6 +263,6 @@ At any step (except step #1) the deployment can rollback (either manually or by 
 ##### TODO add diagrams to explain the blue-green deployment process 
 
 ## Note
-If you require additional variables please create an [issue](https://github.com/byu-oit/terraform-aws-standard-fargate/issues)
- and/or a [pull request](https://github.com/byu-oit/terraform-aws-standard-fargate/pulls) to add the variable and reach 
+If you require additional variables please create an [issue](https://github.com/byu-oit/terraform-aws-fargate-api/issues)
+ and/or a [pull request](https://github.com/byu-oit/terraform-aws-fargate-api/pulls) to add the variable and reach 
  out to the Terraform Working Group on slack (`#terraform` channel).
