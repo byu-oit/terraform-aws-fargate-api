@@ -12,7 +12,7 @@ module "acs" {
 }
 
 module "fargate_api" {
-  source = "../../"
+  source         = "../../"
   app_name       = "example-api"
   container_port = 8000
   primary_container_definition = {
