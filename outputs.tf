@@ -2,6 +2,10 @@ output "fargate_service" {
   value = aws_ecs_service.service
 }
 
+output "ecs_cluster" {
+  value = local.create_new_cluster ? aws_ecs_cluster.new_cluster : data.aws_ecs_cluster.existing_cluster
+}
+
 output "fargate_service_security_group" {
   value = aws_security_group.fargate_service_sg
 }

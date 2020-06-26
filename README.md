@@ -173,6 +173,7 @@ For instance with the [above example](#usage) the logs could be found in the Clo
 | Name | Type | Description |
 | --- | --- | --- |
 | fargate_service | [object](https://www.terraform.io/docs/providers/aws/r/ecs_service.html#attributes-reference) | Fargate ECS Service object |
+| ecs_cluster | [object](https://www.terraform.io/docs/providers/aws/r/ecs_cluster.html#attributes-reference) | ECS Cluster (created or pre-existing) the service is deployed on |
 | fargate_service_security_group | [object](https://www.terraform.io/docs/providers/aws/r/security_group.html#attributes-reference) | Security Group object assigned to the Fargate service |
 | task_definition | [object](https://www.terraform.io/docs/providers/aws/r/ecs_task_definition.html#attributes-reference) | The task definition object of the fargate service |
 | codedeploy_deployment_group | [object](https://www.terraform.io/docs/providers/aws/r/codedeploy_deployment_group.html#attributes-reference) | The CodeDeploy deployment group object. |
