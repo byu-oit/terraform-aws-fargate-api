@@ -11,7 +11,7 @@ customized solution you may need to use this code more as a pattern or guideline
 ## Usage
 ```hcl
 module "my_app" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v2.1.0"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v2.2.0"
   app_name       = "example-api"
   container_port = 8000
   primary_container_definition = {
@@ -50,7 +50,7 @@ module "my_app" {
 ```
 
 ## Created Resources
-* ECS Cluster
+* ECS Cluster (if not provided)
 * ECS Service
     * with security group
 * ECS Task Definition
@@ -74,6 +74,7 @@ module "my_app" {
 | Name | Type | Description | Default |
 | --- | --- | --- | --- |
 | app_name | string | Application name to name your Fargate API and other resources (Must be <= 24 alphanumeric characters) | |
+| ecs_cluster_name | string | Existing ECS Cluster name to host the fargate server. Defaults to creating its own cluster. | <app_name> |
 | primary_container_definition | [object](#container_definition) | The primary container definition for your application. This one will be the only container that receives traffic from the ALB, so make sure the `ports` field contains the same port as the `image_port` | |
 | extra_container_definitions | list([object](#container_definition)) | A list of extra container definitions (side car containers) | [] |
 | container_port | number | The port the primary docker container is listening on | |

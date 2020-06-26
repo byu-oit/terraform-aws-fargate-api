@@ -390,7 +390,7 @@ resource "aws_security_group" "fargate_service_sg" {
 resource "aws_ecs_service" "service" {
   name             = local.service_name
   task_definition  = aws_ecs_task_definition.task_def.arn
-  cluster          = local.create_new_cluster ? aws_ecs_cluster.cluster.id : data.aws_ecs_cluster.existing_cluster.id # if cluster is not provided use created one, else use existing cluster
+  cluster          = local.create_new_cluster ? aws_ecs_cluster.cluster[0].id : data.aws_ecs_cluster.existing_cluster[0].id # if cluster is not provided use created one, else use existing cluster
   desired_count    = var.autoscaling_config != null ? var.autoscaling_config.min_capacity : 1
   launch_type      = "FARGATE"
   platform_version = "1.4.0" # Someday "LATEST" will be updated to support EFS. Right now, "LATEST" still points at 1.3.0
