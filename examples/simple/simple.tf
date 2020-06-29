@@ -7,10 +7,14 @@ module "acs" {
   source = "github.com/byu-oit/terraform-aws-acs-info?ref=v2.1.0"
 }
 
+//resource "aws_ecs_cluster" "existing" {
+//  name = "fake-example-cluster"
+//}
 module "fargate_api" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v2.1.0"
-  //  source         = "../../" // for local testing
-  app_name       = "example-api"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v2.2.0"
+  //  source           = "../../" // for local testing
+  app_name = "example-api"
+  //  ecs_cluster_name = aws_ecs_cluster.existing.name
   container_port = 8000
   primary_container_definition = {
     name  = "example"
