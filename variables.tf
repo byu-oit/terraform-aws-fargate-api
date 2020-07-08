@@ -160,8 +160,8 @@ variable "autoscaling_config" {
 }
 variable "log_retention_in_days" {
   type        = number
-  description = "CloudWatch log group retention in days. Defaults to 30."
-  default     = 30
+  description = "CloudWatch log group retention in days. Defaults to 120."
+  default     = 120
 }
 variable "tags" {
   type        = map(string)
