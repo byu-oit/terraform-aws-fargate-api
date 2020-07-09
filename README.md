@@ -11,7 +11,7 @@ customized solution you may need to use this code more as a pattern or guideline
 ## Usage
 ```hcl
 module "my_app" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v2.2.0"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v2.3.0"
   app_name       = "example-api"
   container_port = 8000
   primary_container_definition = {
@@ -100,7 +100,7 @@ module "my_app" {
 | hosted_zone | [object](#hosted_zone) | Hosted Zone object to redirect to ALB. (Can pass in the aws_hosted_zone object). A and AAAA records created in this hosted zone | |
 | https_certificate_arn | string | ARN of the HTTPS certificate of the hosted zone/domain | |
 | autoscaling_config | [object](#autoscaling_config) | Configuration for default autoscaling policies and alarms. Set to `null` if you want to set up your own autoscaling policies and alarms.  | |
-| log_retention_in_days | number | CloudWatch log group retention in days | 7 |
+| log_retention_in_days | number | CloudWatch log group retention in days | 120 |
 | tags | map(string) | A map of AWS Tags to attach to each resource created | {} |
 
 #### container_definition
