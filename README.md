@@ -11,7 +11,7 @@ customized solution you may need to use this code more as a pattern or guideline
 ## Usage
 ```hcl
 module "my_app" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v2.3.0"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v2.4.0"
   app_name       = "example-api"
   container_port = 8000
   primary_container_definition = {
@@ -268,3 +268,9 @@ At any step (except step #1) the deployment can rollback (either manually or by 
 If you require additional variables please create an [issue](https://github.com/byu-oit/terraform-aws-fargate-api/issues)
  and/or a [pull request](https://github.com/byu-oit/terraform-aws-fargate-api/pulls) to add the variable and reach 
  out to the Terraform Working Group on slack (`#terraform` channel).
+
+## Developing
+
+### Release new version
+
+To release a new version, update the examples in the `examples` folder, the example in this README, and the number in the version file. Pushing to `master` will automatically create a new release and tag in GitHub.
