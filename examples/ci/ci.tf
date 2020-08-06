@@ -3,12 +3,12 @@ terraform {
 }
 
 provider "aws" {
-  version = "~> 2.56"
+  version = "~> 3.0"
   region  = "us-west-2"
 }
 
 module "acs" {
-  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v2.1.0"
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.0.0"
 }
 
 module "fargate_api" {
