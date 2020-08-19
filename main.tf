@@ -565,7 +565,7 @@ resource "aws_cloudwatch_metric_alarm" "down" {
 
 # ==================== AppSpec file ====================
 resource "local_file" "appspec_json" {
-  filename = var.appspec_filename
+  filename = var.appspec_filename != null ? var.apspec_filename : "${path.cwd}/appspec.json"
   content = jsonencode({
     version = 1
     Resources = [{
