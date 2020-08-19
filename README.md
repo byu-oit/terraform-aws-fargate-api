@@ -95,7 +95,7 @@ module "my_app" {
 | codedeploy_termination_wait_time | number | the number of minutes to wait after a successful blue/green deployment before terminating instances from the original environment | 15 |
 | codedeploy_test_listener_port | number | The port for a codedeploy test listener. If provided CodeDeploy will use this port for test traffic on the new replacement set during the blue-green deployment process before shifting production traffic to the replacement set | null |
 | codedeploy_lifecycle_hooks | [object](#codedeploy_lifecycle_hooks) | Define Lambda Functions for each CodeDeploy [lifecycle event hooks](https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html). Use the Lambda function names as the values. Use null if you don't want to invoke a lambda function at that specific hook. Or set this variable to null to not have any lifecycle hooks invoked | `null` |
-| appspec_filename | string | Filename (including path) to use when outputing appspec json. | ${path.cwd}/appspec.json |
+| appspec_filename | string | Filename (including path) to use when outputing appspec json. | `appspec.json` in the current working directory (i.e. where you ran `terraform apply`) |
 | role_permissions_boundary_arn | string | ARN of the IAM Role permissions boundary to place on each IAM role created | |
 | target_group_deregistration_delay | number | Deregistration delay in seconds for ALB target groups | 60 |
 | hosted_zone | [object](#hosted_zone) | Hosted Zone object to redirect to ALB. (Can pass in the aws_hosted_zone object). A and AAAA records created in this hosted zone | |

@@ -133,7 +133,7 @@ variable "codedeploy_lifecycle_hooks" {
 }
 variable "appspec_filename" {
   type        = string
-  description = "Filename (including path) to use when outputing appspec json."
+  description = "`appspec.json` in the current working directory (i.e. where you ran `terraform apply`)"
   default     = null
 }
 variable "role_permissions_boundary_arn" {
