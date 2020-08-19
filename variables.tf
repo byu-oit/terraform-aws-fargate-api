@@ -132,9 +132,9 @@ variable "codedeploy_lifecycle_hooks" {
   default     = null
 }
 variable "appspec_filename" {
-  type = string
+  type        = string
   description = "Filename (including path) to use when outputing appspec json."
-  default = "${path.cwd}/appspec.json"
+  default     = "${path.cwd}/appspec.json"
 }
 variable "role_permissions_boundary_arn" {
   type        = string
