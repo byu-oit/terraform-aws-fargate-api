@@ -131,6 +131,11 @@ variable "codedeploy_lifecycle_hooks" {
   description = "Define Lambda Functions for CodeDeploy lifecycle event hooks. Or set this variable to null to not have any lifecycle hooks invoked. Defaults to null"
   default     = null
 }
+variable "appspec_filename" {
+  type        = string
+  description = "`appspec.json` in the current working directory (i.e. where you ran `terraform apply`)"
+  default     = null
+}
 variable "role_permissions_boundary_arn" {
   type        = string
   description = "ARN of the IAM Role permissions boundary to place on each IAM role created."
