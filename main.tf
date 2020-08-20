@@ -27,10 +27,10 @@ locals {
     "${local.ssm_parameter_arn_base}${replace(param, "/^//", "")}"
   ]
 
-  alb_name                  = "${var.app_name}-alb"                     // ALB name has a restriction of 32 characters max
-  app_domain_url            = "${var.app_name}.${var.hosted_zone.name}" // Route53 A record name
-  cloudwatch_log_group_name = "fargate/${var.app_name}"                 // CloudWatch Log Group name
-  service_name              = var.app_name                              // ECS Service name
+  alb_name                  = "${var.app_name}-alb"                                                           // ALB name has a restriction of 32 characters max
+  app_domain_url            = var.site_url != null ? var.site_url : "${var.app_name}.${var.hosted_zone.name}" // Route53 A record name
+  cloudwatch_log_group_name = "fargate/${var.app_name}"                                                       // CloudWatch Log Group name
+  service_name              = var.app_name                                                                    // ECS Service name
 
   container_definitions = [
     for def in local.definitions : {
