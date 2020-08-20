@@ -145,6 +145,11 @@ variable "target_group_deregistration_delay" {
   description = "Deregistration delay in seconds for ALB target groups. Defaults to 60 seconds."
   default     = 60
 }
+variable "site_url" {
+  type        = string
+  description = "The URL for the site."
+  default     = null
+}
 variable "hosted_zone" {
   type = object({
     name = string,
