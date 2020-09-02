@@ -1,5 +1,5 @@
 terraform {
-  required_version = "0.12.26"
+  required_version = "0.12.29"
 }
 
 provider "aws" {
@@ -54,19 +54,23 @@ module "fargate_api" {
 }
 
 output "fargate_service" {
-  value = module.fargate_api.fargate_service
+  value = module.fargate_api.fargate_service.id
+}
+
+output "ecs_cluster" {
+  value = module.fargate_api.ecs_cluster.arn
 }
 
 output "fargate_service_security_group" {
-  value = module.fargate_api.fargate_service_security_group
+  value = module.fargate_api.fargate_service_security_group.arn
 }
 
 output "task_definition" {
-  value = module.fargate_api.task_definition
+  value = module.fargate_api.task_definition.arn
 }
 
 output "codedeploy_deployment_group" {
-  value = module.fargate_api.codedeploy_deployment_group
+  value = module.fargate_api.codedeploy_deployment_group.id
 }
 
 output "codedeploy_appspec_json_file" {
@@ -74,19 +78,19 @@ output "codedeploy_appspec_json_file" {
 }
 
 output "alb" {
-  value = module.fargate_api.alb
+  value = module.fargate_api.alb.arn
 }
 
 output "alb_security_group" {
-  value = module.fargate_api.alb_security_group
+  value = module.fargate_api.alb_security_group.arn
 }
 
 output "dns_record" {
-  value = module.fargate_api.dns_record
+  value = module.fargate_api.dns_record.fqdn
 }
 
 output "cloudwatch_log_group" {
-  value = module.fargate_api.cloudwatch_log_group
+  value = module.fargate_api.cloudwatch_log_group.arn
 }
 
 output "autoscaling_step_up_policy" {
