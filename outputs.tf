@@ -45,3 +45,11 @@ output "autoscaling_step_up_policy" {
 output "autoscaling_step_down_policy" {
   value = var.autoscaling_config != null ? aws_appautoscaling_policy.down : null
 }
+
+output "task_role" {
+  value = aws_iam_role.task_role
+}
+
+output "task_execution_role" {
+  value = aws_iam_role.task_execution_role
+}
