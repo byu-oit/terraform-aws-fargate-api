@@ -399,7 +399,7 @@ resource "aws_ecs_service" "service" {
   cluster          = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].id : data.aws_ecs_cluster.existing_cluster[0].id # if cluster is not provided use created one, else use existing cluster
   desired_count    = var.autoscaling_config != null ? var.autoscaling_config.min_capacity : 1
   launch_type      = "FARGATE"
-  platform_version = var.fargate_platform_version # Someday "LATEST" will be updated to support EFS. Right now, "LATEST" still points at 1.3.0
+  platform_version = var.fargate_platform_version
   deployment_controller {
     type = "CODE_DEPLOY"
   }
