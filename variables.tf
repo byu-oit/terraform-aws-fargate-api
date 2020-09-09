@@ -178,3 +178,13 @@ variable "tags" {
   description = "A map of AWS Tags to attach to each resource created"
   default     = {}
 }
+variable "lb_logging_enabled" {
+  type        = bool
+  description = "Option to enable logging of load balancer requests."
+  default     = false
+}
+variable "lb_logging_bucket_name" {
+  type        = string
+  description = "Bucket for ALB access logs."
+  default     = ""
+}
