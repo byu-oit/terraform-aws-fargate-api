@@ -11,7 +11,7 @@ customized solution you may need to use this code more as a pattern or guideline
 ## Usage
 ```hcl
 module "my_app" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v3.0.4"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v3.1.0"
   app_name       = "example-api"
   container_port = 8000
   primary_container_definition = {
@@ -104,6 +104,8 @@ module "my_app" {
 | autoscaling_config | [object](#autoscaling_config) | Configuration for default autoscaling policies and alarms. Set to `null` if you want to set up your own autoscaling policies and alarms.  | |
 | log_retention_in_days | number | CloudWatch log group retention in days | 120 |
 | tags | map(string) | A map of AWS Tags to attach to each resource created | {} |
+| lb_logging_enabled | bool | Option to enable logging of load balancer requests. | false |
+| lb_logging_bucket_name | string | Required if `lb_logging_enabled` is true. A bucket to store the logs in with an a [load balancer access policy](https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy) attached. | |
 
 #### container_definition
 Object with following attributes to define the docker container(s) your fargate needs to run.

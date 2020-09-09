@@ -108,7 +108,13 @@ resource "aws_alb" "alb" {
   subnets         = var.public_subnet_ids
   security_groups = [aws_security_group.alb-sg.id]
   tags            = var.tags
+
+  access_logs {
+    bucket  = var.lb_logging_bucket_name
+    enabled = var.lb_logging_enabled
+  }
 }
+
 resource "aws_security_group" "alb-sg" {
   name        = "${local.alb_name}-sg"
   description = "Controls access to the ${local.alb_name}"
