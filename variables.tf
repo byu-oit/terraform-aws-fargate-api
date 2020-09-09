@@ -188,3 +188,8 @@ variable "lb_logging_bucket_name" {
   description = "Bucket for ALB access logs."
   default     = ""
 }
+variable "fargate_platform_version" { # TODO: Add string validation to check for 1.3.0, 1.4.0, or LATEST
+  type        = string
+  description = "Version of the Fargate platform to run."
+  default     = "1.4.0"
+}
