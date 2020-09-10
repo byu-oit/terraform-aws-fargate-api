@@ -8,6 +8,7 @@ module "acs" {
 }
 
 data "aws_caller_identity" "current" {}
+data "aws_elb_service_account" "main" {}
 
 //resource "aws_ecs_cluster" "existing" {
 //  name = "fake-example-cluster"
@@ -86,7 +87,9 @@ resource "aws_s3_bucket_policy" "lb_logs_bucket" {
     {
       "Effect": "Allow",
       "Principal": {
-        "AWS": "arn:aws:iam::797873946194:root"
+        "AWS": [
+          "${data.aws_elb_service_account.main.arn}"
+        ]
       },
       "Action": "s3:PutObject",
       "Resource": "arn:aws:s3:::${aws_s3_bucket.lb_logs.bucket}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
