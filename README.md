@@ -11,7 +11,7 @@ customized solution you may need to use this code more as a pattern or guideline
 ## Usage
 ```hcl
 module "my_app" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v3.0.3"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v3.1.1"
   app_name       = "example-api"
   container_port = 8000
   primary_container_definition = {
@@ -104,6 +104,9 @@ module "my_app" {
 | autoscaling_config | [object](#autoscaling_config) | Configuration for default autoscaling policies and alarms. Set to `null` if you want to set up your own autoscaling policies and alarms.  | |
 | log_retention_in_days | number | CloudWatch log group retention in days | 120 |
 | tags | map(string) | A map of AWS Tags to attach to each resource created | {} |
+| lb_logging_enabled | bool | Option to enable logging of load balancer requests. | false |
+| lb_logging_bucket_name | string | Required if `lb_logging_enabled` is true. A bucket to store the logs in with an a [load balancer access policy](https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy) attached. | |
+| fargate_platform_version | string | Version of the Fargate platform to run. | 1.4.0 |
 
 #### container_definition
 Object with following attributes to define the docker container(s) your fargate needs to run.
@@ -185,6 +188,8 @@ For instance with the [above example](#usage) the logs could be found in the Clo
 | dns_record | [object](https://www.terraform.io/docs/providers/aws/r/route53_record.html#attributes-reference) | The DNS A-record mapped to the ALB | 
 | autoscaling_step_up_policy | [object](https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#attributes-reference) | Autoscaling policy to step up |
 | autoscaling_step_down_policy | [object](https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#attributes-reference) | Autoscaling policy to step down |
+| task_role | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | IAM role created for the tasks. |
+| task_execution_role | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | IAM role created for the execution of tasks. |
 
 #### appspec
 This module also creates a JSON file in the project directory: `appspec.json` used to initiate a CodeDeploy Deployment.

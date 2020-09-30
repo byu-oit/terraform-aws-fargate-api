@@ -178,3 +178,18 @@ variable "tags" {
   description = "A map of AWS Tags to attach to each resource created"
   default     = {}
 }
+variable "lb_logging_enabled" {
+  type        = bool
+  description = "Option to enable logging of load balancer requests."
+  default     = false
+}
+variable "lb_logging_bucket_name" {
+  type        = string
+  description = "Bucket for ALB access logs."
+  default     = ""
+}
+variable "fargate_platform_version" { # TODO: Add string validation to check for 1.3.0, 1.4.0, or LATEST
+  type        = string
+  description = "Version of the Fargate platform to run."
+  default     = "1.4.0"
+}

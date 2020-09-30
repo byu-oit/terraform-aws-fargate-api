@@ -108,7 +108,13 @@ resource "aws_alb" "alb" {
   subnets         = var.public_subnet_ids
   security_groups = [aws_security_group.alb-sg.id]
   tags            = var.tags
+
+  access_logs {
+    bucket  = var.lb_logging_bucket_name
+    enabled = var.lb_logging_enabled
+  }
 }
+
 resource "aws_security_group" "alb-sg" {
   name        = "${local.alb_name}-sg"
   description = "Controls access to the ${local.alb_name}"
@@ -393,7 +399,7 @@ resource "aws_ecs_service" "service" {
   cluster          = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].id : data.aws_ecs_cluster.existing_cluster[0].id # if cluster is not provided use created one, else use existing cluster
   desired_count    = var.autoscaling_config != null ? var.autoscaling_config.min_capacity : 1
   launch_type      = "FARGATE"
-  platform_version = "1.4.0" # Someday "LATEST" will be updated to support EFS. Right now, "LATEST" still points at 1.3.0
+  platform_version = var.fargate_platform_version
   deployment_controller {
     type = "CODE_DEPLOY"
   }
@@ -577,7 +583,7 @@ resource "local_file" "appspec_json" {
             ContainerName = var.primary_container_definition.name
             ContainerPort = var.container_port
           }
-          PlatformVersion = "1.4.0" # Someday "LATEST" will be updated to support EFS. Right now, "LATEST" still points at 1.3.0
+          PlatformVersion = var.fargate_platform_version
         }
       }
     }],
