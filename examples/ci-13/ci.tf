@@ -100,3 +100,11 @@ output "autoscaling_step_up_policy" {
 output "autoscaling_step_down_policy" {
   value = module.fargate_api.autoscaling_step_down_policy
 }
+
+output "task_role" {
+  value = module.fargate_api.task_role
+}
+
+output "task_execution_role" {
+  value = module.fargate_api.task_execution_role
+}
