@@ -102,6 +102,12 @@ variable "public_subnet_ids" {
   type        = list(string)
   description = "List of subnet IDs for the ALB."
 }
+variable "alb_internal_flag" {
+  type        = bool
+  default     = false
+  description = "Is the ALB Internal"
+}
+
 variable "private_subnet_ids" {
   type        = list(string)
   description = "List of subnet IDs for the fargate service."

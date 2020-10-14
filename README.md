@@ -90,6 +90,7 @@ module "my_app" {
 | security_groups | list(string) | List of extra security group IDs to attach to the fargate task | []|
 | vpc_id | string | VPC ID to deploy the ECS fargate service and ALB | |
 | public_subnet_ids | list(string) | List of subnet IDs for the ALB | |
+| alb_internal_flag | bool | Marks an ALB as Internal (Inaccessible to public internet) | false
 | private_subnet_ids | list(string) | List of subnet IDs for the fargate service | |
 | codedeploy_service_role_arn | string | ARN of the IAM Role for the CodeDeploy to use to initiate new deployments. (usually the PowerBuilder Role) | |
 | codedeploy_termination_wait_time | number | the number of minutes to wait after a successful blue/green deployment before terminating instances from the original environment | 15 |

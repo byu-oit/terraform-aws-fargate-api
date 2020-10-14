@@ -108,6 +108,7 @@ resource "aws_alb" "alb" {
   subnets         = var.public_subnet_ids
   security_groups = [aws_security_group.alb-sg.id]
   tags            = var.tags
+  internal        = var.alb_internal_flag
 
   access_logs {
     bucket  = var.lb_logging_bucket_name
