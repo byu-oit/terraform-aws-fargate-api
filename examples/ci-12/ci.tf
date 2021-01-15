@@ -81,6 +81,14 @@ output "alb" {
   value = module.fargate_api.alb.arn
 }
 
+output "alb_traget_group_blue" {
+  value = module.fargate_api.alb_target_group_.blue.arn
+}
+
+output "alb_traget_group_green" {
+  value = module.fargate_api.alb_target_group_.green.arn
+}
+
 output "alb_security_group" {
   value = module.fargate_api.alb_security_group.arn
 }
