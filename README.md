@@ -11,7 +11,7 @@ customized solution you may need to use this code more as a pattern or guideline
 ## Usage
 ```hcl
 module "my_app" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v3.1.1"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v3.1.3"
   app_name       = "example-api"
   container_port = 8000
   primary_container_definition = {
@@ -185,6 +185,7 @@ For instance with the [above example](#usage) the logs could be found in the Clo
 | codedeploy_deployment_group | [object](https://www.terraform.io/docs/providers/aws/r/codedeploy_deployment_group.html#attributes-reference) | The CodeDeploy deployment group object. |
 | codedeploy_appspec_json_file | string | Filename of the generated appspec.json file |
 | alb | [object](https://www.terraform.io/docs/providers/aws/r/lb.html#attributes-reference) | The Application Load Balancer (ALB) object |
+| alb_target_group | [object](https://www.terraform.io/docs/providers/aws/r/lb_target_group.html#attributes-reference) | The Application Load Balancer Target Group (ALB Target Group) object |
 | alb_security_group | [object](https://www.terraform.io/docs/providers/aws/r/security_group.html#attributes-reference) | The ALB's security group object |
 | dns_record | [object](https://www.terraform.io/docs/providers/aws/r/route53_record.html#attributes-reference) | The DNS A-record mapped to the ALB | 
 | autoscaling_step_up_policy | [object](https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#attributes-reference) | Autoscaling policy to step up |
