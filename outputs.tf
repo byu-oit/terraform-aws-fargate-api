@@ -26,6 +26,14 @@ output "alb" {
   value = aws_alb.alb
 }
 
+output "alb_target_group_green" {
+  value = aws_alb_target_group.green
+}
+
+output "alb_target_group_blue" {
+  value = aws_alb_target_group.blue
+}
+
 output "alb_security_group" {
   value = aws_security_group.alb-sg
 }
