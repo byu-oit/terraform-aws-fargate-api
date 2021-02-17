@@ -151,6 +151,11 @@ variable "target_group_deregistration_delay" {
   description = "Deregistration delay in seconds for ALB target groups. Defaults to 60 seconds."
   default     = 60
 }
+variable "target_group_sticky_sessions" {
+  type        = string
+  description = "Sticky sessions on the ALB target groups. Defaults to false."
+  default     = false
+}
 variable "site_url" {
   type        = string
   description = "The URL for the site."

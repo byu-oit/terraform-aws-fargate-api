@@ -162,6 +162,10 @@ resource "aws_alb_target_group" "blue" {
   load_balancing_algorithm_type = "least_outstanding_requests"
   target_type                   = "ip"
   deregistration_delay          = var.target_group_deregistration_delay
+  stickiness {
+    type    = "lb_cookie"
+    enabled = var.target_group_sticky_sessions
+  }
   health_check {
     path                = var.health_check_path
     interval            = var.health_check_interval
@@ -182,6 +186,10 @@ resource "aws_alb_target_group" "green" {
   load_balancing_algorithm_type = "least_outstanding_requests"
   target_type                   = "ip"
   deregistration_delay          = var.target_group_deregistration_delay
+  stickiness {
+    type    = "lb_cookie"
+    enabled = var.target_group_sticky_sessions
+  }
   health_check {
     path                = var.health_check_path
     interval            = var.health_check_interval
