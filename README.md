@@ -11,7 +11,7 @@ customized solution you may need to use this code more as a pattern or guideline
 ## Usage
 ```hcl
 module "my_app" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v3.1.3"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v3.2.0"
   app_name       = "example-api"
   container_port = 8000
   primary_container_definition = {
@@ -99,6 +99,7 @@ module "my_app" {
 | appspec_filename | string | Filename (including path) to use when outputing appspec json. | `appspec.json` in the current working directory (i.e. where you ran `terraform apply`) |
 | role_permissions_boundary_arn | string | ARN of the IAM Role permissions boundary to place on each IAM role created | |
 | target_group_deregistration_delay | number | Deregistration delay in seconds for ALB target groups | 60 |
+| target_group_sticky_sessions | boolean | Enables sticky sessions on the ALB target groups | false |
 | site_url | string | The URL for the site. | Concatenates app_name with hosted_zone_name. |
 | hosted_zone | [object](#hosted_zone) | Hosted Zone object to redirect to ALB. (Can pass in the aws_hosted_zone object). A and AAAA records created in this hosted zone | |
 | https_certificate_arn | string | ARN of the HTTPS certificate of the hosted zone/domain | |
