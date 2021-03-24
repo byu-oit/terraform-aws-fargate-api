@@ -79,7 +79,7 @@ module "my_app" {
 | extra_container_definitions | list([object](#container_definition)) | A list of extra container definitions (side car containers) | [] |
 | container_port | number | The port the primary docker container is listening on | |
 | health_check_path | string | Health check path for the image | "/" |
-| health_check_matcher | string | Expected status code for health check | 200 | 
+| health_check_matcher | string | Expected status code for health check. [See docs for syntax](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html) | 200 | 
 | health_check_interval | number | Amount of time, in seconds, between health checks of an individual target | 30 |
 | health_check_timeout | number | Amount of time, in seconds, during which no response means a failed health check | 5 |
 | health_check_healthy_threshold | number | Number of consecutive health checks required before considering target as healthy | 3 |
