@@ -49,6 +49,11 @@ variable "health_check_path" {
   description = "Health check path for the image. Defaults to \"/\"."
   default     = "/"
 }
+variable "health_check_matcher" {
+  type        = string
+  description = "Expected status code for health check . Defaults to \"200\"."
+  default     = "200"
+}
 variable "health_check_interval" {
   type        = number
   description = "Health check interval; amount of time, in seconds, between health checks of an individual target. Defaults to 30."

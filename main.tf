@@ -168,6 +168,7 @@ resource "aws_alb_target_group" "blue" {
   }
   health_check {
     path                = var.health_check_path
+    matcher             = var.health_check_matcher
     interval            = var.health_check_interval
     timeout             = var.health_check_timeout
     healthy_threshold   = var.health_check_healthy_threshold
@@ -192,6 +193,7 @@ resource "aws_alb_target_group" "green" {
   }
   health_check {
     path                = var.health_check_path
+    matcher             = var.health_check_matcher
     interval            = var.health_check_interval
     timeout             = var.health_check_timeout
     healthy_threshold   = var.health_check_healthy_threshold
