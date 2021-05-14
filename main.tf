@@ -257,6 +257,7 @@ resource "aws_route53_record" "a_record" {
   name    = local.app_domain_url
   type    = "A"
   zone_id = var.hosted_zone.id
+  allow_overwrite = var.overwrite_records
   alias {
     evaluate_target_health = true
     name                   = aws_alb.alb.dns_name
@@ -267,6 +268,7 @@ resource "aws_route53_record" "aaaa_record" {
   name    = local.app_domain_url
   type    = "AAAA"
   zone_id = var.hosted_zone.id
+  allow_overwrite = var.overwrite_records
   alias {
     evaluate_target_health = true
     name                   = aws_alb.alb.dns_name
