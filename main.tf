@@ -254,9 +254,9 @@ resource "aws_alb_listener" "test_listener" {
 
 # ==================== Route53 ====================
 resource "aws_route53_record" "a_record" {
-  name    = local.app_domain_url
-  type    = "A"
-  zone_id = var.hosted_zone.id
+  name            = local.app_domain_url
+  type            = "A"
+  zone_id         = var.hosted_zone.id
   allow_overwrite = var.overwrite_records
   alias {
     evaluate_target_health = true
@@ -265,9 +265,9 @@ resource "aws_route53_record" "a_record" {
   }
 }
 resource "aws_route53_record" "aaaa_record" {
-  name    = local.app_domain_url
-  type    = "AAAA"
-  zone_id = var.hosted_zone.id
+  name            = local.app_domain_url
+  type            = "AAAA"
+  zone_id         = var.hosted_zone.id
   allow_overwrite = var.overwrite_records
   alias {
     evaluate_target_health = true
