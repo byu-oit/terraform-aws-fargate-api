@@ -166,6 +166,11 @@ variable "site_url" {
   description = "The URL for the site."
   default     = null
 }
+variable "overwrite_records" {
+  type        = bool
+  description = "Allow creation of Route53 records in Terraform to overwrite an existing record, if any."
+  default     = false
+}
 variable "hosted_zone" {
   type = object({
     name = string,
