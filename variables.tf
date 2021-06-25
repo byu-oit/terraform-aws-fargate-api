@@ -214,3 +214,8 @@ variable "fargate_platform_version" { # TODO: Add string validation to check for
   description = "Version of the Fargate platform to run."
   default     = "1.4.0"
 }
+variable "xray_enabled" {
+  type        = bool
+  description = "Whether or not the X-Ray daemon should be created with the Fargate API."
+  default     = false
+}

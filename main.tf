@@ -32,7 +32,7 @@ locals {
   cloudwatch_log_group_name = "fargate/${var.app_name}"                                                       // CloudWatch Log Group name
   service_name              = var.app_name                                                                    // ECS Service name
 
-  container_definitions = [
+  user_containers = [
     for def in local.definitions : {
       name       = def.name
       image      = def.image
@@ -79,6 +79,30 @@ locals {
       volumesFrom = []
     }
   ]
+  xray_container = [{
+    name       = "${var.app_name}-xray"
+    image      = "public.ecr.aws/xray/aws-xray-daemon:3.x"
+    essential  = true
+    privileged = false
+    portMappings = [{
+      containerPort = 2000
+      hostPort = null
+      protocol      = "udp"
+    }]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        awslogs-group         = "${local.cloudwatch_log_group_name}-xray"
+        awslogs-region        = data.aws_region.current.name
+        awslogs-stream-prefix = "${local.service_name}-xray"
+      }
+    }
+    environment = []
+    secrets     = []
+    mountPoints = []
+    volumesFrom = []
+  }]
+  container_definitions = var.xray_enabled == true ? concat(local.user_containers, local.xray_container) : local.user_containers
 
   hooks = var.codedeploy_lifecycle_hooks != null ? setsubtract([
     for hook in keys(var.codedeploy_lifecycle_hooks) :
@@ -134,7 +158,7 @@ resource "aws_security_group" "alb-sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  // if test listner port is specified, allow traffic
+  // if test listener port is specified, allow traffic
   dynamic "ingress" {
     for_each = var.codedeploy_test_listener_port != null ? [1] : []
     content {
@@ -352,6 +376,11 @@ resource "aws_iam_role_policy_attachment" "secret_task_policy_attach" {
   count      = local.has_secrets ? 1 : 0
   policy_arn = aws_iam_policy.secrets_access[0].arn
   role       = aws_iam_role.task_role.name
+}
+resource "aws_iam_role_policy_attachment" "xray_task_policy_attach" {
+  count = var.xray_enabled == true ? 1 : 0
+  policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+  role = aws_iam_role.task_role.name
 }
 # --- task definition ---
 resource "aws_ecs_task_definition" "task_def" {

@@ -57,6 +57,7 @@ module "fargate_api" {
   vpc_id                        = module.acs.vpc.id
   codedeploy_service_role_arn   = module.acs.power_builder_role.arn
   role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn
+  xray_enabled                  = true
 
   tags = {
     env              = "dev"
