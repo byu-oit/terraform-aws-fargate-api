@@ -86,7 +86,7 @@ locals {
     privileged = false
     portMappings = [{
       containerPort = 2000
-      hostPort = null
+      hostPort      = null
       protocol      = "udp"
     }]
     logConfiguration = {
@@ -378,9 +378,9 @@ resource "aws_iam_role_policy_attachment" "secret_task_policy_attach" {
   role       = aws_iam_role.task_role.name
 }
 resource "aws_iam_role_policy_attachment" "xray_task_policy_attach" {
-  count = var.xray_enabled == true ? 1 : 0
+  count      = var.xray_enabled == true ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
-  role = aws_iam_role.task_role.name
+  role       = aws_iam_role.task_role.name
 }
 # --- task definition ---
 resource "aws_ecs_task_definition" "task_def" {
