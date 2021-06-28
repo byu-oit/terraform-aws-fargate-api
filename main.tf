@@ -531,7 +531,7 @@ resource "aws_cloudwatch_log_group" "container_log_group" {
   retention_in_days = var.log_retention_in_days
   tags              = var.tags
 }
-resource "aws_cloudwatch_log_group" "container_log_group" {
+resource "aws_cloudwatch_log_group" "xray_log_group" {
   count             = (var.xray_enabled == true) ? 1 : 0
   name              = local.xray_cloudwatch_log_group_name
   retention_in_days = var.log_retention_in_days
