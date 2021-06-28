@@ -30,6 +30,7 @@ locals {
   alb_name                  = "${var.app_name}-alb"                                                           // ALB name has a restriction of 32 characters max
   app_domain_url            = var.site_url != null ? var.site_url : "${var.app_name}.${var.hosted_zone.name}" // Route53 A record name
   cloudwatch_log_group_name = "fargate/${var.app_name}"                                                       // CloudWatch Log Group name
+  xray_cloudwatch_log_group_name = "${local.cloudwatch_log_group_name}-xray"
   service_name              = var.app_name                                                                    // ECS Service name
 
   user_containers = [
@@ -92,7 +93,7 @@ locals {
     logConfiguration = {
       logDriver = "awslogs"
       options = {
-        awslogs-group         = "${local.cloudwatch_log_group_name}-xray"
+        awslogs-group         = local.xray_cloudwatch_log_group_name
         awslogs-region        = data.aws_region.current.name
         awslogs-stream-prefix = "${local.service_name}-xray"
       }
@@ -527,6 +528,12 @@ resource "aws_codedeploy_deployment_group" "deploymentgroup" {
 # ==================== CloudWatch ====================
 resource "aws_cloudwatch_log_group" "container_log_group" {
   name              = local.cloudwatch_log_group_name
+  retention_in_days = var.log_retention_in_days
+  tags              = var.tags
+}
+resource "aws_cloudwatch_log_group" "container_log_group" {
+  count             = (var.xray_enabled == true) ? 1 : 0
+  name              = local.xray_cloudwatch_log_group_name
   retention_in_days = var.log_retention_in_days
   tags              = var.tags
 }
