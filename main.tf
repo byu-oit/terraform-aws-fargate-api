@@ -148,25 +148,28 @@ resource "aws_security_group" "alb-sg" {
 
   // allow access to the ALB from anywhere for 80 and 443
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    cidr_blocks     = var.alb_sg_ingress_cidrs
+    security_groups = var.alb_sg_ingress_sg_ids
   }
   ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    cidr_blocks     = var.alb_sg_ingress_cidrs
+    security_groups = var.alb_sg_ingress_sg_ids
   }
   // if test listener port is specified, allow traffic
   dynamic "ingress" {
     for_each = var.codedeploy_test_listener_port != null ? [1] : []
     content {
-      from_port   = var.codedeploy_test_listener_port
-      to_port     = var.codedeploy_test_listener_port
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+      from_port       = var.codedeploy_test_listener_port
+      to_port         = var.codedeploy_test_listener_port
+      protocol        = "tcp"
+      cidr_blocks     = var.alb_sg_ingress_cidrs
+      security_groups = var.alb_sg_ingress_sg_ids
     }
   }
   // allow any outgoing traffic

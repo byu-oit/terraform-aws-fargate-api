@@ -113,10 +113,23 @@ variable "alb_internal_flag" {
   description = "Is the ALB Internal"
 }
 
+variable "alb_sg_ingress_cidrs" {
+  type        = list(string)
+  description = "List of cidrs to allow alb ingress for"
+  default     = ["0.0.0.0/0"]
+}
+
+variable "alb_sg_ingress_sg_ids" {
+  type        = list(string)
+  description = "List of security groups to allow ingress"
+  default     = []
+}
+
 variable "private_subnet_ids" {
   type        = list(string)
   description = "List of subnet IDs for the fargate service."
 }
+
 variable "codedeploy_service_role_arn" {
   type        = string
   description = "ARN of the IAM Role for the CodeDeploy to use to initiate new deployments. (usually the PowerBuilder Role)"
