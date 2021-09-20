@@ -104,7 +104,7 @@ module "my_app" {
 | target_group_deregistration_delay | number | Deregistration delay in seconds for ALB target groups | 60 |
 | target_group_sticky_sessions | boolean | Enables sticky sessions on the ALB target groups | false |
 | site_url | string | The URL for the site. | Concatenates app_name with hosted_zone_name. |
-| allow_overwrite | bool | Allow creation of Route53 records in Terraform to overwrite an existing record, if any. | false |
+| overwrite_records | bool | Allow creation of Route53 records in Terraform to overwrite an existing record, if any. | false |
 | hosted_zone | [object](#hosted_zone) | Hosted Zone object to redirect to ALB. (Can pass in the aws_hosted_zone object). A and AAAA records created in this hosted zone | |
 | https_certificate_arn | string | ARN of the HTTPS certificate of the hosted zone/domain | |
 | autoscaling_config | [object](#autoscaling_config) | Configuration for default autoscaling policies and alarms. Set to `null` if you want to set up your own autoscaling policies and alarms.  | |
