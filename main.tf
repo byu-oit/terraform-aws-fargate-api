@@ -338,7 +338,7 @@ data "aws_iam_policy_document" "secrets_access" {
     actions = [
       "ssm:GetParameters",
       "ssm:GetParameter",
-      "ssm:GetParemetersByPath"
+      "ssm:GetParametersByPath"
     ]
     resources = local.secrets_arns
   }
