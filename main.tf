@@ -466,9 +466,10 @@ resource "aws_ecs_service" "service" {
 
   lifecycle {
     ignore_changes = [
-      task_definition, // ignore because new revisions will get added after code deploy's blue-green deployment
-      load_balancer,   // ignore because load balancer can change after code deploy's blue-green deployment
-      desired_count    // igrnore because we're assuming you have autoscaling to manage the container count
+      task_definition,      // ignore because new revisions will get added after code deploy's blue-green deployment
+      load_balancer,        // ignore because load balancer can change after code deploy's blue-green deployment
+      desired_count,        // ignore because we're assuming you have autoscaling to manage the container count
+      network_configuration // ignore because it has to be managed by codedeploy
     ]
   }
 }
