@@ -636,6 +636,13 @@ resource "local_file" "appspec_json" {
             ContainerPort = var.container_port
           }
           PlatformVersion = var.fargate_platform_version
+          NetworkConfiguration = {
+            AwsvpcConfiguration = {
+              Subnets = var.private_subnet_ids
+              SecurityGroups = concat([aws_security_group.fargate_service_sg.id], var.security_groups)
+              AssignPublicIp = "DISABLED"
+            }
+          }
         }
       }
     }],
