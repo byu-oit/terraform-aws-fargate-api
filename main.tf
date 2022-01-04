@@ -450,8 +450,8 @@ resource "aws_ecs_service" "service" {
     type = "CODE_DEPLOY"
   }
   network_configuration {
-    subnets          = var.private_subnet_ids
-    security_groups  = concat([aws_security_group.fargate_service_sg.id], var.security_groups)
+    subnets         = var.private_subnet_ids
+    security_groups = concat([aws_security_group.fargate_service_sg.id], var.security_groups)
   }
 
   load_balancer {
