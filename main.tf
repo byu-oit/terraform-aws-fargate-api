@@ -450,9 +450,8 @@ resource "aws_ecs_service" "service" {
     type = "CODE_DEPLOY"
   }
   network_configuration {
-    subnets          = var.private_subnet_ids
-    security_groups  = concat([aws_security_group.fargate_service_sg.id], var.security_groups)
-    assign_public_ip = true
+    subnets         = var.private_subnet_ids
+    security_groups = concat([aws_security_group.fargate_service_sg.id], var.security_groups)
   }
 
   load_balancer {
@@ -467,9 +466,10 @@ resource "aws_ecs_service" "service" {
 
   lifecycle {
     ignore_changes = [
-      task_definition, // ignore because new revisions will get added after code deploy's blue-green deployment
-      load_balancer,   // ignore because load balancer can change after code deploy's blue-green deployment
-      desired_count    // igrnore because we're assuming you have autoscaling to manage the container count
+      task_definition,      // ignore because new revisions will get added after code deploy's blue-green deployment
+      load_balancer,        // ignore because load balancer can change after code deploy's blue-green deployment
+      desired_count,        // ignore because we're assuming you have autoscaling to manage the container count
+      network_configuration // ignore because it has to be managed by codedeploy
     ]
   }
 }
@@ -636,6 +636,13 @@ resource "local_file" "appspec_json" {
             ContainerPort = var.container_port
           }
           PlatformVersion = var.fargate_platform_version
+          NetworkConfiguration = {
+            AwsvpcConfiguration = {
+              Subnets        = var.private_subnet_ids
+              SecurityGroups = concat([aws_security_group.fargate_service_sg.id], var.security_groups)
+              AssignPublicIp = "DISABLED"
+            }
+          }
         }
       }
     }],
