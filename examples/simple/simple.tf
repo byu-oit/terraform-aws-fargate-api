@@ -4,14 +4,14 @@ provider "aws" {
 }
 
 module "acs" {
-  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.1.0"
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.5.0"
 }
 
 //resource "aws_ecs_cluster" "existing" {
 //  name = "fake-example-cluster"
 //}
 module "fargate_api" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v3.3.2"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v3.4.0"
   //  source           = "../../" // for local testing
   app_name = "example-api"
   //  ecs_cluster_name = aws_ecs_cluster.existing.name
