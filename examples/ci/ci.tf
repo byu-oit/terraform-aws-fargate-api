@@ -133,9 +133,11 @@ output "autoscaling_step_down_policy" {
 }
 
 output "task_role" {
-  value = module.fargate_api.task_role
+  value     = module.fargate_api.task_role
+  sensitive = true
 }
 
 output "task_execution_role" {
-  value = module.fargate_api.task_execution_role
+  value     = module.fargate_api.task_execution_role
+  sensitive = true
 }

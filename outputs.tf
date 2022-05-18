@@ -55,9 +55,11 @@ output "autoscaling_step_down_policy" {
 }
 
 output "task_role" {
-  value = aws_iam_role.task_role
+  value     = aws_iam_role.task_role
+  sensitive = true
 }
 
 output "task_execution_role" {
-  value = aws_iam_role.task_execution_role
+  value     = aws_iam_role.task_execution_role
+  sensitive = true
 }
