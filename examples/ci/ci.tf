@@ -1,10 +1,16 @@
 terraform {
-  required_version = "0.13.2"
+  required_version = ">= 0.12"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
 }
 
 provider "aws" {
-  version = "~> 3.0"
-  region  = "us-west-2"
+  region = "us-west-2"
 }
 
 module "acs" {
@@ -25,7 +31,20 @@ module "fargate_api" {
     secrets = {
       foo = "/super-secret"
     }
-    efs_volume_mounts = null
+    efs_volume_mounts = [
+      {
+        name           = "a"
+        file_system_id = aws_efs_file_system.my_efs.id
+        root_directory = "/a"
+        container_path = "/a"
+      },
+      {
+        name           = "b"
+        file_system_id = aws_efs_file_system.my_efs.id
+        root_directory = "/b"
+        container_path = "/b"
+      }
+    ]
   }
 
   autoscaling_config            = null
@@ -52,6 +71,9 @@ module "fargate_api" {
     data-sensitivity = "internal"
     repo             = "https://github.com/byu-oit/terraform-aws-fargate-api"
   }
+}
+
+resource "aws_efs_file_system" "my_efs" {
 }
 
 output "fargate_service" {

@@ -16,20 +16,38 @@ jobs:
           matrix='{
             "env":[
               {
-                "tf_version":"0.14.8",
-                "tf_working_dir":"./examples/ci-14",
+                "tf_version":"1.1.9",
+                "tf_working_dir":"./examples/ci",
                 "aws_key_name":"byu_oit_terraform_dev_key",
                 "aws_secret_name":"byu_oit_terraform_dev_secret"
               },
               {
-                "tf_version":"0.13.2",
-                "tf_working_dir":"./examples/ci-13",
+                "tf_version":"1.0.11",
+                "tf_working_dir":"./examples/ci",
                 "aws_key_name":"byu_oit_terraform_dev_key",
                 "aws_secret_name":"byu_oit_terraform_dev_secret"
               },
               {
-                "tf_version":"0.12.29",
-                "tf_working_dir":"./examples/ci-12",
+                "tf_version":"0.15.5",
+                "tf_working_dir":"./examples/ci",
+                "aws_key_name":"byu_oit_terraform_dev_key",
+                "aws_secret_name":"byu_oit_terraform_dev_secret"
+              },
+              {
+                "tf_version":"0.14.11",
+                "tf_working_dir":"./examples/ci",
+                "aws_key_name":"byu_oit_terraform_dev_key",
+                "aws_secret_name":"byu_oit_terraform_dev_secret"
+              },
+              {
+                "tf_version":"0.13.7",
+                "tf_working_dir":"./examples/ci",
+                "aws_key_name":"byu_oit_terraform_dev_key",
+                "aws_secret_name":"byu_oit_terraform_dev_secret"
+              },
+              {
+                "tf_version":"0.12.31",
+                "tf_working_dir":"./examples/ci",
                 "aws_key_name":"byu_oit_terraform_dev_key",
                 "aws_secret_name":"byu_oit_terraform_dev_secret"
               }
