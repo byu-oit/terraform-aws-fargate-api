@@ -202,6 +202,11 @@ variable "autoscaling_config" {
   })
   description = "Configuration for default autoscaling policies and alarms. Set to null if you want to set up your own autoscaling policies and alarms."
 }
+variable "log_group_name" {
+  type        = string
+  description = "CloudWatch log group name."
+  default     = ""
+}
 variable "log_retention_in_days" {
   type        = number
   description = "CloudWatch log group retention in days. Defaults to 120."
