@@ -203,71 +203,75 @@ variable "autoscaling_config" {
   description = "Configuration for default autoscaling policies and alarms. Set to null if you want to set up your own autoscaling policies and alarms."
 }
 
-variable "autoscaling_advanced_config" {
+variable "up_scaling_policy_config" {
   type = object({
-    up_scaling_policy_config = object({
-      adjustment_type             = string
-      metric_aggregation_type     = string
-      cooldown                    = number
-      scaling_adjustment          = number
-      metric_interval_lower_bound = number
-    })
-    up_alarm_config = object({
-      statistic           = string
-      metric_name         = string
-      comparison_operator = string
-      threshold           = number
-      period              = number
-      evaluation_periods  = number
-    })
-    down_scaling_policy_config = object({
-      adjustment_type             = string
-      metric_aggregation_type     = string
-      cooldown                    = number
-      scaling_adjustment          = number
-      metric_interval_upper_bound = number
-    })
-    down_alarm_config = object({
-      statistic           = string
-      metric_name         = string
-      comparison_operator = string
-      threshold           = number
-      period              = number
-      evaluation_periods  = number
-    })
+    adjustment_type             = string
+    metric_aggregation_type     = string
+    cooldown                    = number
+    scaling_adjustment          = number
+    metric_interval_lower_bound = number
   })
-  description = "Adjust the advanced configuration for scaling. Limited to ECS metrics."
   default = {
-    up_scaling_policy_config = {
-      adjustment_type             = "ChangeInCapacity"
-      metric_aggregation_type     = "Average"
-      cooldown                    = 300
-      scaling_adjustment          = 1
-      metric_interval_lower_bound = 0
-    }
-    up_alarm_config = {
-      statistic           = "Average"
-      metric_name         = "CPUUtilization"
-      comparison_operator = "GreaterThanThreshold"
-      threshold           = 75
-      period              = 300
-      evaluation_periods  = 5
-    }
-    down_scaling_policy_config = {
-      adjustment_type             = "ChangeInCapacity"
-      metric_aggregation_type     = "Average"
-      cooldown                    = 300
-      scaling_adjustment          = -1
-      metric_interval_upper_bound = 0
-    }
-    down_alarm_config = {
-      statistic           = "Average"
-      metric_name         = "CPUUtilization"
-      comparison_operator = "LessThanThreshold"
-      threshold           = 25
-      period              = 300
-      evaluation_periods  = 5
-    }
+    adjustment_type             = "ChangeInCapacity"
+    metric_aggregation_type     = "Average"
+    cooldown                    = 300
+    scaling_adjustment          = 1
+    metric_interval_lower_bound = 0
+  }
+}
+
+variable "up_metric_alarm_config" {
+  type = object({
+    statistic           = string
+    metric_name         = string
+    comparison_operator = string
+    threshold           = number
+    period              = number
+    evaluation_periods  = number
+  })
+  default = {
+    statistic           = "Average"
+    metric_name         = "CPUUtilization"
+    comparison_operator = "GreaterThanThreshold"
+    threshold           = 75
+    period              = 300
+    evaluation_periods  = 5
+  }
+}
+
+variable "down_scaling_policy_config" {
+  type = object({
+    adjustment_type             = string
+    metric_aggregation_type     = string
+    cooldown                    = number
+    scaling_adjustment          = number
+    metric_interval_upper_bound = number
+  })
+  default = {
+    adjustment_type             = "ChangeInCapacity"
+    metric_aggregation_type     = "Average"
+    cooldown                    = 300
+    scaling_adjustment          = -1
+    metric_interval_upper_bound = 0
+  }
+}
+
+variable "down_metric_alarm_config" {
+  type = object({
+    statistic           = string
+    metric_name         = string
+    comparison_operator = string
+    threshold           = number
+    period              = number
+    evaluation_periods  = number
+  })
+  default = {
+    statistic           = "Average"
+    metric_name         = "CPUUtilization"
+    comparison_operator = "LessThanThreshold"
+    threshold           = 25
+    period              = 300
+    evaluation_periods  = 5
   }
 }
 variable "log_group_name" {
