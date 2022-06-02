@@ -205,53 +205,69 @@ variable "autoscaling_config" {
 
 variable "autoscaling_advanced_config" {
   type = object({
-    up_adjustment_type               = string
-    up_metric_aggregation_type       = string
-    up_cooldown                      = number
-    up_scaling_adjustment            = number
-    up_metric_interval_lower_bound   = number
-    up_statistic                     = string
-    up_metric_name                   = string
-    up_comparison_operator           = string
-    up_threshold                     = number
-    up_period                        = number
-    up_evaluation_periods            = number
-    down_adjustment_type             = string
-    down_metric_aggregation_type     = string
-    down_cooldown                    = number
-    down_scaling_adjustment          = number
-    down_metric_interval_upper_bound = number
-    down_statistic                   = string
-    down_metric_name                 = string
-    down_comparison_operator         = string
-    down_threshold                   = number
-    down_period                      = number
-    down_evaluation_periods          = number
+    up_scaling_policy_config = object({
+      adjustment_type             = string
+      metric_aggregation_type     = string
+      cooldown                    = number
+      scaling_adjustment          = number
+      metric_interval_lower_bound = number
+    })
+    up_alarm_config = object({
+      statistic           = string
+      metric_name         = string
+      comparison_operator = string
+      threshold           = number
+      period              = number
+      evaluation_periods  = number
+    })
+    down_scaling_policy_config = object({
+      adjustment_type             = string
+      metric_aggregation_type     = string
+      cooldown                    = number
+      scaling_adjustment          = number
+      metric_interval_upper_bound = number
+    })
+    down_alarm_config = object({
+      statistic           = string
+      metric_name         = string
+      comparison_operator = string
+      threshold           = number
+      period              = number
+      evaluation_periods  = number
+    })
   })
-  description = "Adjust the configuration for scaling. Limited to ECS metrics."
+  description = "Adjust the advanced configuration for scaling. Limited to ECS metrics."
   default = {
-    up_adjustment_type               = "ChangeInCapacity"
-    up_metric_aggregation_type       = "Average"
-    up_cooldown                      = 300
-    up_scaling_adjustment            = 1
-    up_metric_interval_lower_bound   = 0
-    up_statistic                     = "Average"
-    up_metric_name                   = "CPUUtilization"
-    up_comparison_operator           = "GreaterThanThreshold"
-    up_threshold                     = 75
-    up_period                        = 300
-    up_evaluation_periods            = 5
-    down_adjustment_type             = "ChangeInCapacity"
-    down_metric_aggregation_type     = "Average"
-    down_cooldown                    = 300
-    down_scaling_adjustment          = -1
-    down_metric_interval_upper_bound = 0
-    down_statistic                   = "Average"
-    down_metric_name                 = "CPUUtilization"
-    down_comparison_operator         = "LessThanThreshold"
-    down_threshold                   = 25
-    down_period                      = 300
-    down_evaluation_periods          = 5
+    up_scaling_policy_config = {
+      adjustment_type             = "ChangeInCapacity"
+      metric_aggregation_type     = "Average"
+      cooldown                    = 300
+      scaling_adjustment          = 1
+      metric_interval_lower_bound = 0
+    }
+    up_alarm_config = {
+      statistic           = "Average"
+      metric_name         = "CPUUtilization"
+      comparison_operator = "GreaterThanThreshold"
+      threshold           = 75
+      period              = 300
+      evaluation_periods  = 5
+    }
+    down_scaling_policy_config = {
+      adjustment_type             = "ChangeInCapacity"
+      metric_aggregation_type     = "Average"
+      cooldown                    = 300
+      scaling_adjustment          = -1
+      metric_interval_upper_bound = 0
+    }
+    down_alarm_config = {
+      statistic           = "Average"
+      metric_name         = "CPUUtilization"
+      comparison_operator = "LessThanThreshold"
+      threshold           = 25
+      period              = 300
+      evaluation_periods  = 5
+    }
   }
 }
 variable "log_group_name" {
