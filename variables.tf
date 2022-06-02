@@ -211,6 +211,7 @@ variable "up_scaling_policy_config" {
     scaling_adjustment          = number
     metric_interval_lower_bound = number
   })
+  description = "Advanced configuration for the scaling up policy if 'autoscaling_config' is in use."
   default = {
     adjustment_type             = "ChangeInCapacity"
     metric_aggregation_type     = "Average"
@@ -229,6 +230,7 @@ variable "up_metric_alarm_config" {
     period              = number
     evaluation_periods  = number
   })
+  description = "Advanced configuration for the scaling up metric alarm if 'autoscaling_config' is in use."
   default = {
     statistic           = "Average"
     metric_name         = "CPUUtilization"
@@ -247,6 +249,7 @@ variable "down_scaling_policy_config" {
     scaling_adjustment          = number
     metric_interval_upper_bound = number
   })
+  description = "Advanced configuration for the scaling down policy if 'autoscaling_config' is in use."
   default = {
     adjustment_type             = "ChangeInCapacity"
     metric_aggregation_type     = "Average"
@@ -265,6 +268,7 @@ variable "down_metric_alarm_config" {
     period              = number
     evaluation_periods  = number
   })
+  description = "Advanced configuration for scaling the down metric alarm if 'autoscaling_config' is in use."
   default = {
     statistic           = "Average"
     metric_name         = "CPUUtilization"
