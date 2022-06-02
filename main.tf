@@ -558,13 +558,13 @@ resource "aws_appautoscaling_policy" "up" {
   service_namespace  = aws_appautoscaling_target.default[0].service_namespace
 
   step_scaling_policy_configuration {
-    adjustment_type         = "ChangeInCapacity"
-    metric_aggregation_type = "Average"
-    cooldown                = 300
+    adjustment_type         = var.autoscaling_advanced_config.up_adjustment_type
+    metric_aggregation_type = var.autoscaling_advanced_config.up_metric_aggregation_type
+    cooldown                = var.autoscaling_advanced_config.up_cooldown
 
     step_adjustment {
-      scaling_adjustment          = 1
-      metric_interval_lower_bound = 0
+      scaling_adjustment          = var.autoscaling_advanced_config.up_scaling_adjustment
+      metric_interval_lower_bound = var.autoscaling_advanced_config.up_metric_interval_lower_bound
     }
   }
 }
@@ -576,12 +576,12 @@ resource "aws_cloudwatch_metric_alarm" "up" {
     ClusterName = local.cluster_name
     ServiceName = aws_ecs_service.service.name
   }
-  statistic           = "Average"
-  metric_name         = "CPUUtilization"
-  comparison_operator = "GreaterThanThreshold"
-  threshold           = 75
-  period              = 300
-  evaluation_periods  = 5
+  statistic           = var.autoscaling_advanced_config.up_statistic
+  metric_name         = var.autoscaling_advanced_config.up_metric_name
+  comparison_operator = var.autoscaling_advanced_config.up_comparison_operator
+  threshold           = var.autoscaling_advanced_config.up_threshold
+  period              = var.autoscaling_advanced_config.up_period
+  evaluation_periods  = var.autoscaling_advanced_config.up_evaluation_periods
   alarm_actions       = [aws_appautoscaling_policy.up[0].arn]
   tags                = var.tags
 }
@@ -593,13 +593,13 @@ resource "aws_appautoscaling_policy" "down" {
   service_namespace  = aws_appautoscaling_target.default[0].service_namespace
 
   step_scaling_policy_configuration {
-    adjustment_type         = "ChangeInCapacity"
-    metric_aggregation_type = "Average"
-    cooldown                = 300
+    adjustment_type         = var.autoscaling_advanced_config.down_adjustment_type
+    metric_aggregation_type = var.autoscaling_advanced_config.down_metric_aggregation_type
+    cooldown                = var.autoscaling_advanced_config.down_cooldown
 
     step_adjustment {
-      scaling_adjustment          = -1
-      metric_interval_upper_bound = 0
+      scaling_adjustment          = var.autoscaling_advanced_config.down_scaling_adjustment
+      metric_interval_upper_bound = var.autoscaling_advanced_config.down_metric_interval_upper_bound
     }
   }
 }
@@ -611,12 +611,12 @@ resource "aws_cloudwatch_metric_alarm" "down" {
     ClusterName = local.cluster_name
     ServiceName = aws_ecs_service.service.name
   }
-  statistic           = "Average"
-  metric_name         = "CPUUtilization"
-  comparison_operator = "LessThanThreshold"
-  threshold           = 25
-  period              = 300
-  evaluation_periods  = 5
+  statistic           = var.autoscaling_advanced_config.down_statistic
+  metric_name         = var.autoscaling_advanced_config.down_metric_name
+  comparison_operator = var.autoscaling_advanced_config.down_comparison_operator
+  threshold           = var.autoscaling_advanced_config.down_threshold
+  period              = var.autoscaling_advanced_config.down_period
+  evaluation_periods  = var.autoscaling_advanced_config.down_evaluation_periods
   alarm_actions       = [aws_appautoscaling_policy.down[0].arn]
   tags                = var.tags
 }
