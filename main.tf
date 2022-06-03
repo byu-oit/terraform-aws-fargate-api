@@ -598,7 +598,7 @@ resource "aws_appautoscaling_policy" "down" {
     cooldown                = var.scaling_down_policy_config.cooldown
 
     step_adjustment {
-      scaling_adjustment          = var.scaling_down_policy_config.adjustment_type
+      scaling_adjustment          = var.scaling_down_policy_config.scaling_adjustment
       metric_interval_upper_bound = var.scaling_down_policy_config.metric_interval_upper_bound
     }
   }

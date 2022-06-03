@@ -13,7 +13,7 @@ customized solution you may need to use this code more as a pattern or guideline
 
 ```hcl
 module "my_app" {
-  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v3.4.0"
+  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v3.5.0"
   app_name                     = "example-api"
   container_port               = 8000
   primary_container_definition = {
@@ -113,10 +113,10 @@ module "my_app" {
 | hosted_zone                       | [object](#hosted_zone)                      | Hosted Zone object to redirect to ALB. (Can pass in the aws_hosted_zone object). A and AAAA records created in this hosted zone                                                                                                                                                                                                                                           |                                                                                        |
 | https_certificate_arn             | string                                      | ARN of the HTTPS certificate of the hosted zone/domain                                                                                                                                                                                                                                                                                                                    |                                                                                        |
 | autoscaling_config                | [object](#autoscaling_config)               | Configuration for default autoscaling policies and alarms. Set to `null` if you want to set up your own autoscaling policies and alarms.                                                                                                                                                                                                                                  |                                                                                        |
-| scaling_up_policy_config          | [object](#scaling_up_policy_config)         | Advanced configuration for the scaling up policy if 'autoscaling_config' is in use.                                                                                                                                                                                                                                                                                       | todo                                                                                   |                                                                           |
-| scaling_up_metric_alarm_config    | [object](#scaling_up_metric_alarm_config)   | Advanced configuration for the scaling up metric alarm if 'autoscaling_config' is in use.                                                                                                                                                                                                                                                                                 | todo                                                                                   |                                                                                  |
-| scaling_down_policy_config        | [object](#scaling_down_policy_config)       | Advanced configuration for the scaling down policy if 'autoscaling_config' is in use.                                                                                                                                                                                                                                                                                     | todo                                                                                   |                                                                                |
-| scaling_down_metric_alarm_config  | [object](#scaling_down_metric_alarm_config) | Advanced configuration for scaling the down metric alarm if 'autoscaling_config' is in use."                                                                                                                                                                                                                                                                              | todo                                                                                   |
+| scaling_up_policy_config          | [object](#scaling_up_policy_config)         | Optional advanced configuration for the scaling up policy if 'autoscaling_config' is in use.                                                                                                                                                                                                                                                                              | See object definition [object](#scaling_up_policy_config)                              |                                                                        
+| scaling_up_metric_alarm_config    | [object](#scaling_up_metric_alarm_config)   | Optional advanced configuration for the scaling up metric alarm if 'autoscaling_config' is in use.                                                                                                                                                                                                                                                                        | See object definition [object](#scaling_up_metric_alarm_config)                        |                                                                        
+| scaling_down_policy_config        | [object](#scaling_down_policy_config)       | Optional advanced configuration for the scaling down policy if 'autoscaling_config' is in use.                                                                                                                                                                                                                                                                            | See object definition [object](#scaling_down_policy_config)                            |                                                                        
+| scaling_down_metric_alarm_config  | [object](#scaling_down_metric_alarm_config) | Optional advanced configuration for scaling the down metric alarm if 'autoscaling_config' is in use."                                                                                                                                                                                                                                                                     | See object definition [object](#scaling_down_metric_alarm_config)                      |
 | log_group_name                    | string                                      | CloudWatch log group name.                                                                                                                                                                                                                                                                                                                                                |                                                                                        |
 | log_retention_in_days             | number                                      | CloudWatch log group retention in days                                                                                                                                                                                                                                                                                                                                    | 120                                                                                    |
 | tags                              | map(string)                                 | A map of AWS Tags to attach to each resource created                                                                                                                                                                                                                                                                                                                      | {}                                                                                     |
@@ -209,12 +209,16 @@ count will be ignored after the first time.
 
 This will allow the scaling up policy to be configured if necessary.
 
-* **`adjustment_type`** - (Required) Specifies whether the adjustment is an absolute number or a percentage of the current capacity.
+* **`adjustment_type`** - (Required) Specifies whether the adjustment is an absolute number or a percentage of the
+  current capacity.
 * **`metric_aggregation_type`** - (Required) The aggregation type for the policy's metrics.
-* **`cooldown`** - (Required) The amount of time, in seconds, after a scaling activity completes and before the next scaling activity can start.
-* **`scaling_adjustment`** - (Required) The number of members by which to scale, when the adjustment bounds are breached. A positive value scales up. A negative value scales down.
-* **`metric_interval_lower_bound`** - (Required) The lower bound for the difference between the alarm threshold and the CloudWatch metric.
-* Default: 
+* **`cooldown`** - (Required) The amount of time, in seconds, after a scaling activity completes and before the next
+  scaling activity can start.
+* **`scaling_adjustment`** - (Required) The number of members by which to scale, when the adjustment bounds are
+  breached. A positive value scales up. A negative value scales down.
+* **`metric_interval_lower_bound`** - (Required) The lower bound for the difference between the alarm threshold and the
+  CloudWatch metric.
+* Default:
   ```
     {
       adjustment_type             = "ChangeInCapacity"
@@ -229,11 +233,15 @@ This will allow the scaling up policy to be configured if necessary.
 
 This will allow the scaling down policy to be configured if necessary.
 
-* **`adjustment_type`** - (Required) Specifies whether the adjustment is an absolute number or a percentage of the current capacity.
+* **`adjustment_type`** - (Required) Specifies whether the adjustment is an absolute number or a percentage of the
+  current capacity.
 * **`metric_aggregation_type`** - (Required) The aggregation type for the policy's metrics.
-* **`cooldown`** - (Required) The amount of time, in seconds, after a scaling activity completes and before the next scaling activity can start.
-* **`scaling_adjustment`** - (Required) The number of members by which to scale, when the adjustment bounds are breached. A positive value scales up. A negative value scales down.
-* **`metric_interval_upper_bound`** - The upper bound for the difference between the alarm threshold and the CloudWatch metric.
+* **`cooldown`** - (Required) The amount of time, in seconds, after a scaling activity completes and before the next
+  scaling activity can start.
+* **`scaling_adjustment`** - (Required) The number of members by which to scale, when the adjustment bounds are
+  breached. A positive value scales up. A negative value scales down.
+* **`metric_interval_upper_bound`** - The upper bound for the difference between the alarm threshold and the CloudWatch
+  metric.
 * Default:
   ```
     {
@@ -251,7 +259,8 @@ This will allow the scaling up alarm to be configured if necessary.
 
 * **`statistic`** - (Required) The statistic to apply to the alarm's associated metric.
 * **`metric_name`** - (Required) The name for the alarm's associated metric.
-* **`comparison_operator`** - (Required) The arithmetic operation to use when comparing the specified Statistic and Threshold.
+* **`comparison_operator`** - (Required) The arithmetic operation to use when comparing the specified Statistic and
+  Threshold.
 * **`threshold`** - (Required) The value against which the specified statistic is compared.
 * **`period`** - (Required) The period in seconds over which the specified statistic is applied.
 * **`evaluation_periods`** - (Required) The number of periods over which data is compared to the specified threshold.
@@ -273,7 +282,8 @@ This will allow the scaling down alarm to be configured if necessary.
 
 * **`statistic`** - (Required) The statistic to apply to the alarm's associated metric.
 * **`metric_name`** - (Required) The name for the alarm's associated metric.
-* **`comparison_operator`** - (Required) The arithmetic operation to use when comparing the specified Statistic and Threshold.
+* **`comparison_operator`** - (Required) The arithmetic operation to use when comparing the specified Statistic and
+  Threshold.
 * **`threshold`** - (Required) The value against which the specified statistic is compared.
 * **`period`** - (Required) The period in seconds over which the specified statistic is applied.
 * **`evaluation_periods`** - (Required) The number of periods over which data is compared to the specified threshold.
