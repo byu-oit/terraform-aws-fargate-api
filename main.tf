@@ -558,13 +558,13 @@ resource "aws_appautoscaling_policy" "up" {
   service_namespace  = aws_appautoscaling_target.default[0].service_namespace
 
   step_scaling_policy_configuration {
-    adjustment_type         = var.up_scaling_policy_config.adjustment_type
-    metric_aggregation_type = var.up_scaling_policy_config.metric_aggregation_type
-    cooldown                = var.up_scaling_policy_config.cooldown
+    adjustment_type         = var.scaling_up_policy_config.adjustment_type
+    metric_aggregation_type = var.scaling_up_policy_config.metric_aggregation_type
+    cooldown                = var.scaling_up_policy_config.cooldown
 
     step_adjustment {
-      scaling_adjustment          = var.up_scaling_policy_config.scaling_adjustment
-      metric_interval_lower_bound = var.up_scaling_policy_config.metric_interval_lower_bound
+      scaling_adjustment          = var.scaling_up_policy_config.scaling_adjustment
+      metric_interval_lower_bound = var.scaling_up_policy_config.metric_interval_lower_bound
     }
   }
 }
@@ -576,12 +576,12 @@ resource "aws_cloudwatch_metric_alarm" "up" {
     ClusterName = local.cluster_name
     ServiceName = aws_ecs_service.service.name
   }
-  statistic           = var.up_metric_alarm_config.statistic
-  metric_name         = var.up_metric_alarm_config.metric_name
-  comparison_operator = var.up_metric_alarm_config.comparison_operator
-  threshold           = var.up_metric_alarm_config.threshold
-  period              = var.up_metric_alarm_config.period
-  evaluation_periods  = var.up_metric_alarm_config.evaluation_periods
+  statistic           = var.scaling_up_metric_alarm_config.statistic
+  metric_name         = var.scaling_up_metric_alarm_config.metric_name
+  comparison_operator = var.scaling_up_metric_alarm_config.comparison_operator
+  threshold           = var.scaling_up_metric_alarm_config.threshold
+  period              = var.scaling_up_metric_alarm_config.period
+  evaluation_periods  = var.scaling_up_metric_alarm_config.evaluation_periods
   alarm_actions       = [aws_appautoscaling_policy.up[0].arn]
   tags                = var.tags
 }
@@ -593,13 +593,13 @@ resource "aws_appautoscaling_policy" "down" {
   service_namespace  = aws_appautoscaling_target.default[0].service_namespace
 
   step_scaling_policy_configuration {
-    adjustment_type         = var.down_scaling_policy_config.adjustment_type
-    metric_aggregation_type = var.down_scaling_policy_config.metric_aggregation_type
-    cooldown                = var.down_scaling_policy_config.cooldown
+    adjustment_type         = var.scaling_down_policy_config.adjustment_type
+    metric_aggregation_type = var.scaling_down_policy_config.metric_aggregation_type
+    cooldown                = var.scaling_down_policy_config.cooldown
 
     step_adjustment {
-      scaling_adjustment          = var.down_scaling_policy_config.adjustment_type
-      metric_interval_upper_bound = var.down_scaling_policy_config.metric_interval_upper_bound
+      scaling_adjustment          = var.scaling_down_policy_config.adjustment_type
+      metric_interval_upper_bound = var.scaling_down_policy_config.metric_interval_upper_bound
     }
   }
 }
@@ -611,12 +611,12 @@ resource "aws_cloudwatch_metric_alarm" "down" {
     ClusterName = local.cluster_name
     ServiceName = aws_ecs_service.service.name
   }
-  statistic           = var.down_metric_alarm_config.statistic
-  metric_name         = var.down_metric_alarm_config.metric_name
-  comparison_operator = var.down_metric_alarm_config.comparison_operator
-  threshold           = var.down_metric_alarm_config.threshold
-  period              = var.down_metric_alarm_config.period
-  evaluation_periods  = var.down_metric_alarm_config.evaluation_periods
+  statistic           = var.scaling_down_metric_alarm_config.statistic
+  metric_name         = var.scaling_down_metric_alarm_config.metric_name
+  comparison_operator = var.scaling_down_metric_alarm_config.comparison_operator
+  threshold           = var.scaling_down_metric_alarm_config.threshold
+  period              = var.scaling_down_metric_alarm_config.period
+  evaluation_periods  = var.scaling_down_metric_alarm_config.evaluation_periods
   alarm_actions       = [aws_appautoscaling_policy.down[0].arn]
   tags                = var.tags
 }
