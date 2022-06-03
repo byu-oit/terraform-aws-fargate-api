@@ -202,7 +202,6 @@ variable "autoscaling_config" {
   })
   description = "Configuration for default autoscaling policies and alarms. Set to null if you want to set up your own autoscaling policies and alarms."
 }
-
 variable "up_scaling_policy_config" {
   type = object({
     adjustment_type             = string
@@ -220,7 +219,6 @@ variable "up_scaling_policy_config" {
     metric_interval_lower_bound = 0
   }
 }
-
 variable "up_metric_alarm_config" {
   type = object({
     statistic           = string
@@ -240,7 +238,6 @@ variable "up_metric_alarm_config" {
     evaluation_periods  = 5
   }
 }
-
 variable "down_scaling_policy_config" {
   type = object({
     adjustment_type             = string
@@ -258,7 +255,6 @@ variable "down_scaling_policy_config" {
     metric_interval_upper_bound = 0
   }
 }
-
 variable "down_metric_alarm_config" {
   type = object({
     statistic           = string
