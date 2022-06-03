@@ -209,11 +209,11 @@ count will be ignored after the first time.
 
 This will allow the scaling up policy to be configured if necessary.
 
-* **`adjustment_type`** - (Required) Minimum task count for autoscaling (this will also be used to define the initial
-* **`metric_aggregation_type`** - (Required) Maximum task count for autoscaling
-* **`cooldown`** - (Required) Minimum task count for autoscaling (this will also be used to define the initial
-* **`scaling_adjustment`** - (Required) Maximum task count for autoscaling
-* **`metric_interval_lower_bound`** - (Required) Maximum task count for autoscaling
+* **`adjustment_type`** - (Required) Specifies whether the adjustment is an absolute number or a percentage of the current capacity.
+* **`metric_aggregation_type`** - (Required) The aggregation type for the policy's metrics.
+* **`cooldown`** - (Required) The amount of time, in seconds, after a scaling activity completes and before the next scaling activity can start.
+* **`scaling_adjustment`** - (Required) The number of members by which to scale, when the adjustment bounds are breached. A positive value scales up. A negative value scales down.
+* **`metric_interval_lower_bound`** - (Required) The lower bound for the difference between the alarm threshold and the CloudWatch metric.
 * Default: 
   ```
     {
@@ -229,11 +229,11 @@ This will allow the scaling up policy to be configured if necessary.
 
 This will allow the scaling down policy to be configured if necessary.
 
-* **`adjustment_type`** - (Required) Minimum task count for autoscaling (this will also be used to define the initial
-* **`metric_aggregation_type`** - (Required) Maximum task count for autoscaling
-* **`cooldown`** - (Required) Minimum task count for autoscaling (this will also be used to define the initial
-* **`scaling_adjustment`** - (Required) Maximum task count for autoscaling
-* **`metric_interval_upper_bound`** - (Required) Maximum task count for autoscaling
+* **`adjustment_type`** - (Required) Specifies whether the adjustment is an absolute number or a percentage of the current capacity.
+* **`metric_aggregation_type`** - (Required) The aggregation type for the policy's metrics.
+* **`cooldown`** - (Required) The amount of time, in seconds, after a scaling activity completes and before the next scaling activity can start.
+* **`scaling_adjustment`** - (Required) The number of members by which to scale, when the adjustment bounds are breached. A positive value scales up. A negative value scales down.
+* **`metric_interval_upper_bound`** - The upper bound for the difference between the alarm threshold and the CloudWatch metric.
 * Default:
   ```
     {
@@ -249,12 +249,12 @@ This will allow the scaling down policy to be configured if necessary.
 
 This will allow the scaling up alarm to be configured if necessary.
 
-* **`statistic`** - (Required) Minimum task count for autoscaling (this will also be used to define the initial
-* **`metric_name`** - (Required) Maximum task count for autoscaling
-* **`comparison_operator`** - (Required) Minimum task count for autoscaling (this will also be used to define the
-* **`threshold`** - (Required) Maximum task count for autoscaling
-* **`period`** - (Required) Maximum task count for autoscaling
-* **`evaluation_periods`** - (Required) Maximum task count for autoscaling
+* **`statistic`** - (Required) The statistic to apply to the alarm's associated metric.
+* **`metric_name`** - (Required) The name for the alarm's associated metric.
+* **`comparison_operator`** - (Required) The arithmetic operation to use when comparing the specified Statistic and Threshold.
+* **`threshold`** - (Required) The value against which the specified statistic is compared.
+* **`period`** - (Required) The period in seconds over which the specified statistic is applied.
+* **`evaluation_periods`** - (Required) The number of periods over which data is compared to the specified threshold.
 * Default:
   ```
     {
@@ -271,12 +271,12 @@ This will allow the scaling up alarm to be configured if necessary.
 
 This will allow the scaling down alarm to be configured if necessary.
 
-* **`statistic`** - (Required) Minimum task count for autoscaling (this will also be used to define the initial
-* **`metric_name`** - (Required) Maximum task count for autoscaling
-* **`comparison_operator`** - (Required) Minimum task count for autoscaling (this will also be used to define the
-* **`threshold`** - (Required) Maximum task count for autoscaling
-* **`period`** - (Required) Maximum task count for autoscaling
-* **`evaluation_periods`** - (Required) Maximum task count for autoscaling
+* **`statistic`** - (Required) The statistic to apply to the alarm's associated metric.
+* **`metric_name`** - (Required) The name for the alarm's associated metric.
+* **`comparison_operator`** - (Required) The arithmetic operation to use when comparing the specified Statistic and Threshold.
+* **`threshold`** - (Required) The value against which the specified statistic is compared.
+* **`period`** - (Required) The period in seconds over which the specified statistic is applied.
+* **`evaluation_periods`** - (Required) The number of periods over which data is compared to the specified threshold.
 * Default:
   ```
     {
