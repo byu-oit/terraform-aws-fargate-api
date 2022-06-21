@@ -29,7 +29,7 @@ locals {
 
   alb_name                       = "${var.app_name}-alb"                                                           // ALB name has a restriction of 32 characters max
   app_domain_url                 = var.site_url != null ? var.site_url : "${var.app_name}.${var.hosted_zone.name}" // Route53 A record name
-  cloudwatch_log_group_name      = "fargate/${var.app_name}"                                                       // CloudWatch Log Group name
+  cloudwatch_log_group_name      = length(var.log_group_name) > 0 ? var.log_group_name : "fargate/${var.app_name}" // CloudWatch Log Group name
   xray_cloudwatch_log_group_name = "${local.cloudwatch_log_group_name}-xray"
   service_name                   = var.app_name // ECS Service name
 
@@ -558,13 +558,13 @@ resource "aws_appautoscaling_policy" "up" {
   service_namespace  = aws_appautoscaling_target.default[0].service_namespace
 
   step_scaling_policy_configuration {
-    adjustment_type         = "ChangeInCapacity"
-    metric_aggregation_type = "Average"
-    cooldown                = 300
+    adjustment_type         = var.scaling_up_policy_config.adjustment_type
+    metric_aggregation_type = var.scaling_up_policy_config.metric_aggregation_type
+    cooldown                = var.scaling_up_policy_config.cooldown
 
     step_adjustment {
-      scaling_adjustment          = 1
-      metric_interval_lower_bound = 0
+      scaling_adjustment          = var.scaling_up_policy_config.scaling_adjustment
+      metric_interval_lower_bound = var.scaling_up_policy_config.metric_interval_lower_bound
     }
   }
 }
@@ -576,12 +576,12 @@ resource "aws_cloudwatch_metric_alarm" "up" {
     ClusterName = local.cluster_name
     ServiceName = aws_ecs_service.service.name
   }
-  statistic           = "Average"
-  metric_name         = "CPUUtilization"
-  comparison_operator = "GreaterThanThreshold"
-  threshold           = 75
-  period              = 300
-  evaluation_periods  = 5
+  statistic           = var.scaling_up_metric_alarm_config.statistic
+  metric_name         = var.scaling_up_metric_alarm_config.metric_name
+  comparison_operator = var.scaling_up_metric_alarm_config.comparison_operator
+  threshold           = var.scaling_up_metric_alarm_config.threshold
+  period              = var.scaling_up_metric_alarm_config.period
+  evaluation_periods  = var.scaling_up_metric_alarm_config.evaluation_periods
   alarm_actions       = [aws_appautoscaling_policy.up[0].arn]
   tags                = var.tags
 }
@@ -593,13 +593,13 @@ resource "aws_appautoscaling_policy" "down" {
   service_namespace  = aws_appautoscaling_target.default[0].service_namespace
 
   step_scaling_policy_configuration {
-    adjustment_type         = "ChangeInCapacity"
-    metric_aggregation_type = "Average"
-    cooldown                = 300
+    adjustment_type         = var.scaling_down_policy_config.adjustment_type
+    metric_aggregation_type = var.scaling_down_policy_config.metric_aggregation_type
+    cooldown                = var.scaling_down_policy_config.cooldown
 
     step_adjustment {
-      scaling_adjustment          = -1
-      metric_interval_upper_bound = 0
+      scaling_adjustment          = var.scaling_down_policy_config.scaling_adjustment
+      metric_interval_upper_bound = var.scaling_down_policy_config.metric_interval_upper_bound
     }
   }
 }
@@ -611,12 +611,12 @@ resource "aws_cloudwatch_metric_alarm" "down" {
     ClusterName = local.cluster_name
     ServiceName = aws_ecs_service.service.name
   }
-  statistic           = "Average"
-  metric_name         = "CPUUtilization"
-  comparison_operator = "LessThanThreshold"
-  threshold           = 25
-  period              = 300
-  evaluation_periods  = 5
+  statistic           = var.scaling_down_metric_alarm_config.statistic
+  metric_name         = var.scaling_down_metric_alarm_config.metric_name
+  comparison_operator = var.scaling_down_metric_alarm_config.comparison_operator
+  threshold           = var.scaling_down_metric_alarm_config.threshold
+  period              = var.scaling_down_metric_alarm_config.period
+  evaluation_periods  = var.scaling_down_metric_alarm_config.evaluation_periods
   alarm_actions       = [aws_appautoscaling_policy.down[0].arn]
   tags                = var.tags
 }
