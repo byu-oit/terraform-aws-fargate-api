@@ -45,6 +45,13 @@ module "fargate_api" {
         container_path = "/b"
       }
     ]
+    ulimits = [
+      {
+        name       = "nofile"
+        soft_limit = 2048
+        hard_limit = 8192
+      }
+    ]
   }
 
   autoscaling_config            = null

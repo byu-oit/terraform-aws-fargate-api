@@ -78,6 +78,14 @@ locals {
         }
       ]
       volumesFrom = []
+      ulimits = [
+        for ulimit in(def.ulimits != null ? def.ulimits : []) :
+        {
+          name      = ulimit.name
+          softLimit = ulimit.soft_limit
+          hardLimit = ulimit.hard_limit
+        }
+      ]
     }
   ]
   xray_container = [{
@@ -102,6 +110,7 @@ locals {
     secrets     = []
     mountPoints = []
     volumesFrom = []
+    ulimits     = []
   }]
   container_definitions = var.xray_enabled == true ? concat(local.user_containers, local.xray_container) : local.user_containers
 
