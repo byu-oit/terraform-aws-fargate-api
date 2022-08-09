@@ -20,6 +20,11 @@ variable "primary_container_definition" {
       root_directory = string
       container_path = string
     }))
+    ulimits = list(object({
+      name       = string
+      soft_limit = number
+      hard_limit = number
+    }))
   })
   description = "The primary container definition for your application. This one will be the only container that receives traffic from the ALB, so make sure the 'ports' field contains the same port as the 'image_port'"
 }
@@ -35,6 +40,11 @@ variable "extra_container_definitions" {
       file_system_id = string
       root_directory = string
       container_path = string
+    }))
+    ulimits = list(object({
+      name       = string
+      soft_limit = number
+      hard_limit = number
     }))
   }))
   description = "A list of extra container definitions. Defaults to []"
