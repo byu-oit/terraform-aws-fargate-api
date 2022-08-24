@@ -13,7 +13,7 @@ customized solution you may need to use this code more as a pattern or guideline
 
 ```hcl
 module "my_app" {
-  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v3.5.0"
+  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v4.0.0"
   app_name                     = "example-api"
   container_port               = 8000
   primary_container_definition = {
@@ -23,6 +23,7 @@ module "my_app" {
     environment_variables = null
     secrets               = null
     efs_volume_mounts     = null
+    ulimits               = null
   }
 
   autoscaling_config            = null
@@ -137,6 +138,7 @@ Object with following attributes to define the docker container(s) your fargate 
 * **`secrets`** - (Required) a map of secrets from the parameter store to be assigned to env variables
 * **`efs_volume_mounts`** - (Required) a list of efs_volume_mount [objects](#efs_volume_mount) to be mounted into the
   container.
+* **`ulimits`** - (Required) a list of ulimit [objects](#ulimit) to be set on the container.
 
 **Before running this configuration** make sure that your ECR repo exists and an image has been pushed to the repo.
 
@@ -166,6 +168,25 @@ See the following docs for more details:
 * https://www.terraform.io/docs/providers/aws/r/ecs_task_definition.html#efs-volume-configuration-arguments
 * https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ContainerDefinition.html
 * https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_MountPoint.html
+
+#### ulimit
+
+Example
+
+```
+    ulimits = [
+      {
+        name = "nofile"
+        soft_limit = 2048
+        hard_limit = 8192
+      }
+    ]
+```
+
+See the following docs for more details:
+
+* https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ContainerDefinition.html
+* https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_Ulimit.html
 
 #### codedeploy_lifecycle_hooks
 
