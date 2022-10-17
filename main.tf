@@ -248,10 +248,6 @@ resource "aws_alb_listener" "https" {
   default_action {
     type = "forward"
     forward {
-      stickiness {
-        duration = 0
-        enabled  = false
-      }
       target_group {
         arn    = aws_alb_target_group.blue.arn
         weight = 100
@@ -296,10 +292,6 @@ resource "aws_alb_listener" "test_listener" {
   default_action {
     type = "forward"
     forward {
-      stickiness {
-        duration = 0
-        enabled  = false
-      }
       target_group {
         arn    = aws_alb_target_group.blue.arn
         weight = 100
