@@ -266,8 +266,8 @@ resource "aws_alb_listener" "https" {
     // CodeDeploy will switch the target groups back and forth for the listener, so ignore them and let CodeDeploy manage target groups
     ignore_changes = [
       default_action[0].target_group_arn,
-      default_action[0].forward.target_group[0].weight,
-      default_action[0].forward.target_group[1].weight
+      default_action[0].forward[0].target_group[0].weight,
+      default_action[0].forward[0].target_group[1].weight
     ]
   }
   depends_on = [
@@ -315,8 +315,8 @@ resource "aws_alb_listener" "test_listener" {
     // CodeDeploy will switch the target groups back and forth for the listener, so ignore them and let CodeDeploy manage target groups
     ignore_changes = [
       default_action[0].target_group_arn,
-      default_action[0].forward.target_group[0].weight,
-      default_action[0].forward.target_group[1].weight
+      default_action[0].forward[0].target_group[0].weight,
+      default_action[0].forward[0].target_group[1].weight
     ]
   }
   depends_on = [
