@@ -246,11 +246,24 @@ resource "aws_alb_listener" "https" {
   protocol          = "HTTPS"
   certificate_arn   = var.https_certificate_arn
   default_action {
-    type             = "forward"
-    target_group_arn = aws_alb_target_group.blue.arn
+    type = "forward"
+    forward {
+      target_group {
+        arn    = aws_alb_target_group.blue.arn
+        weight = 100
+      }
+      target_group {
+        arn    = aws_alb_target_group.green.arn
+        weight = 0
+      }
+    }
   }
   lifecycle {
-    ignore_changes = [default_action[0].target_group_arn]
+    // CodeDeploy will switch the target groups back and forth for the listener, so ignore them and let CodeDeploy manage target groups
+    ignore_changes = [
+      default_action[0].target_group_arn,
+      default_action[0].forward[0].target_group
+    ]
   }
   depends_on = [
     aws_alb_target_group.blue,
@@ -277,11 +290,24 @@ resource "aws_alb_listener" "test_listener" {
   protocol          = "HTTPS"
   certificate_arn   = var.https_certificate_arn
   default_action {
-    type             = "forward"
-    target_group_arn = aws_alb_target_group.blue.arn
+    type = "forward"
+    forward {
+      target_group {
+        arn    = aws_alb_target_group.blue.arn
+        weight = 100
+      }
+      target_group {
+        arn    = aws_alb_target_group.green.arn
+        weight = 0
+      }
+    }
   }
   lifecycle {
-    ignore_changes = [default_action[0].target_group_arn]
+    // CodeDeploy will switch the target groups back and forth for the listener, so ignore them and let CodeDeploy manage target groups
+    ignore_changes = [
+      default_action[0].target_group_arn,
+      default_action[0].forward[0].target_group
+    ]
   }
   depends_on = [
     aws_alb_target_group.blue,
