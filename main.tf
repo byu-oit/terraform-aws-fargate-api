@@ -1,7 +1,7 @@
 terraform {
   required_version = ">= 1.3.0"
   required_providers {
-    aws = ">= 3.0.0"
+    aws = ">= 3.69"
   }
 }
 
@@ -423,11 +423,15 @@ resource "aws_iam_role_policy_attachment" "xray_task_policy_attach" {
 }
 # --- task definition ---
 resource "aws_ecs_task_definition" "task_def" {
-  container_definitions    = jsonencode(local.container_definitions)
-  family                   = "${var.app_name}-def"
-  cpu                      = var.task_cpu
-  memory                   = var.task_memory
-  network_mode             = "awsvpc"
+  container_definitions = jsonencode(local.container_definitions)
+  family                = "${var.app_name}-def"
+  cpu                   = var.task_cpu
+  memory                = var.task_memory
+  network_mode          = "awsvpc"
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = var.cpu_architecture
+  }
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = aws_iam_role.task_execution_role.arn
   task_role_arn            = aws_iam_role.task_role.arn
