@@ -104,6 +104,11 @@ variable "task_memory" {
   description = "Memory for the task definition. Defaults to 512."
   default     = 512
 }
+variable "cpu_architecture" {
+  type        = string
+  description = "CPU architecture for the task definition. Defaults to X86_64."
+  default     = "X86_64"
+}
 variable "security_groups" {
   type        = list(string)
   description = "List of extra security group IDs to attach to the fargate task."
