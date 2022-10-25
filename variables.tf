@@ -12,19 +12,19 @@ variable "primary_container_definition" {
     name                  = string
     image                 = string
     ports                 = list(number)
-    environment_variables = map(string)
-    secrets               = map(string)
-    efs_volume_mounts = list(object({
+    environment_variables = optional(map(string))
+    secrets               = optional(map(string))
+    efs_volume_mounts = optional(list(object({
       name           = string
       file_system_id = string
       root_directory = string
       container_path = string
-    }))
-    ulimits = list(object({
+    })))
+    ulimits = optional(list(object({
       name       = string
       soft_limit = number
       hard_limit = number
-    }))
+    })))
   })
   description = "The primary container definition for your application. This one will be the only container that receives traffic from the ALB, so make sure the 'ports' field contains the same port as the 'image_port'"
 }
@@ -33,19 +33,19 @@ variable "extra_container_definitions" {
     name                  = string
     image                 = string
     ports                 = list(number)
-    environment_variables = map(string)
-    secrets               = map(string)
-    efs_volume_mounts = list(object({
+    environment_variables = optional(map(string))
+    secrets               = optional(map(string))
+    efs_volume_mounts = optional(list(object({
       name           = string
       file_system_id = string
       root_directory = string
       container_path = string
-    }))
-    ulimits = list(object({
+    })))
+    ulimits = optional(list(object({
       name       = string
       soft_limit = number
       hard_limit = number
-    }))
+    })))
   }))
   description = "A list of extra container definitions. Defaults to []"
   default     = []
@@ -156,11 +156,11 @@ variable "codedeploy_test_listener_port" {
 }
 variable "codedeploy_lifecycle_hooks" {
   type = object({
-    BeforeInstall         = string
-    AfterInstall          = string
-    AfterAllowTestTraffic = string
-    BeforeAllowTraffic    = string
-    AfterAllowTraffic     = string
+    BeforeInstall         = optional(string)
+    AfterInstall          = optional(string)
+    AfterAllowTestTraffic = optional(string)
+    BeforeAllowTraffic    = optional(string)
+    AfterAllowTraffic     = optional(string)
   })
   description = "Define Lambda Functions for CodeDeploy lifecycle event hooks. Or set this variable to null to not have any lifecycle hooks invoked. Defaults to null"
   default     = null
@@ -211,6 +211,7 @@ variable "autoscaling_config" {
     max_capacity = number
   })
   description = "Configuration for default autoscaling policies and alarms. Set to null if you want to set up your own autoscaling policies and alarms."
+  default     = null
 }
 variable "scaling_up_policy_config" {
   type = object({

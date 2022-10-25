@@ -1,6 +1,16 @@
+terraform {
+  required_version = ">= 1.3"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
+}
+
 provider "aws" {
-  version = "~> 3.0"
-  region  = "us-west-2"
+  region = "us-west-2"
 }
 
 module "acs" {
@@ -14,7 +24,7 @@ data "aws_elb_service_account" "main" {}
 //  name = "fake-example-cluster"
 //}
 module "fargate_api" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v4.0.1"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v5.0.0"
   //  source           = "../../" // for local testing
   app_name = "example-api"
   //  ecs_cluster_name = aws_ecs_cluster.existing.name
@@ -29,18 +39,11 @@ module "fargate_api" {
     secrets = {
       foo = "/super-secret"
     }
-    efs_volume_mounts = null
-    ulimits           = null
   }
 
-  autoscaling_config            = null
   codedeploy_test_listener_port = 8443
   codedeploy_lifecycle_hooks = {
-    BeforeInstall         = null
-    AfterInstall          = null
     AfterAllowTestTraffic = "testLifecycle"
-    BeforeAllowTraffic    = null
-    AfterAllowTraffic     = null
   }
 
   hosted_zone                   = module.acs.route53_zone
