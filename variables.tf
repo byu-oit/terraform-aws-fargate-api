@@ -303,7 +303,7 @@ variable "log_retention_in_days" {
 variable "tags" {
   type        = map(string)
   description = "A map of AWS Tags to attach to each resource created"
-  default     = {}
+  default     = null
 }
 variable "lb_logging_enabled" {
   type        = bool
