@@ -138,11 +138,12 @@ locals {
 
 # ==================== ALB ====================
 resource "aws_alb" "alb" {
-  name            = local.alb_name
-  subnets         = var.public_subnet_ids
-  security_groups = [aws_security_group.alb-sg.id]
-  tags            = var.tags
-  internal        = var.alb_internal_flag
+  name                   = local.alb_name
+  desync_mitigation_mode = "strictest"
+  subnets                = var.public_subnet_ids
+  security_groups        = [aws_security_group.alb-sg.id]
+  tags                   = var.tags
+  internal               = var.alb_internal_flag
 
   access_logs {
     bucket  = var.lb_logging_bucket_name
