@@ -477,7 +477,7 @@ resource "aws_security_group" "fargate_service_sg" {
 resource "aws_ecs_service" "service" {
   name             = local.service_name
   task_definition  = aws_ecs_task_definition.task_def.arn
-  cluster          = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].id : var.existing_ecs_cluster.id # if cluster is not provided use created one, else use existing cluster
+  cluster          = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].id : var.existing_ecs_cluster.arn # if cluster is not provided use created one, else use existing cluster
   desired_count    = var.autoscaling_config != null ? var.autoscaling_config.min_capacity : 1
   launch_type      = "FARGATE"
   platform_version = var.fargate_platform_version

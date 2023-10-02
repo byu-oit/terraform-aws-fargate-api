@@ -17,18 +17,9 @@ module "acs" {
   source = "github.com/byu-oit/terraform-aws-acs-info?ref=v4.0.0"
 }
 
-// test existing cluster
-resource "aws_ecs_cluster" "existing" {
-  name = "test"
-}
-
 module "fargate_api" {
   source   = "../../"
   app_name = "example-api"
-  existing_ecs_cluster = {
-    arn = aws_ecs_cluster.existing.arn
-    id  = aws_ecs_cluster.existing.id
-  }
   container_port = 8000
   primary_container_definition = {
     name  = "example"
