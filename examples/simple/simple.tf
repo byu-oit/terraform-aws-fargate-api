@@ -21,8 +21,8 @@ resource "aws_ecs_cluster" "existing" {
   name = "fake-example-cluster"
 }
 module "fargate_api" {
-  source   = "../../" // for local testing
-  app_name = "example-api"
+  source         = "../../" // for local testing
+  app_name       = "example-api"
   container_port = 8000
   primary_container_definition = {
     name  = "example"

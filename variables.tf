@@ -49,7 +49,7 @@ variable "existing_ecs_cluster" {
   type = object({
     arn = string
   })
-  default = null
+  default     = null
   description = "Existing ECS Cluster configuration to host the fargate scheduled task. Defaults to creating its own cluster."
 }
 variable "container_port" {
