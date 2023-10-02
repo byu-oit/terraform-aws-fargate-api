@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        terraform: [ '1.3.x' ]
+        terraform: [ '1.3.x', '1.4.x', '1.5.x' ]
       fail-fast: false
     permissions:
       contents: read

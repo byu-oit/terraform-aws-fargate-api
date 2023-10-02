@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.69"
+      version = "~> 4.0"
     }
   }
 }
@@ -88,7 +88,7 @@ output "fargate_service" {
 }
 
 output "ecs_cluster" {
-  value = module.fargate_api.ecs_cluster.arn
+  value = module.fargate_api.new_ecs_cluster.arn
 }
 
 output "fargate_service_security_group" {
