@@ -54,7 +54,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ env.tf_working_dir }}
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Terraform Plan
         working-directory: ${{ env.tf_working_dir }}
