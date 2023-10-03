@@ -21,8 +21,8 @@ resource "aws_ecs_cluster" "existing" {
   name = "fake-example-cluster"
 }
 module "fargate_api" {
-  source         = "../../" // for local testing
-  app_name       = "example-api"
+  source   = "../../" // for local testing
+  app_name = "example-api"
   existing_ecs_cluster = {
     arn = aws_ecs_cluster.existing.arn
     id  = aws_ecs_cluster.existing.id

@@ -47,7 +47,7 @@ variable "extra_container_definitions" {
 }
 variable "existing_ecs_cluster" {
   type = object({
-    arn = string
+    arn  = string
     name = string
   })
   default     = null
