@@ -9,7 +9,7 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  create_new_cluster = var.existing_ecs_cluster != null ? true : false
+  create_new_cluster = var.existing_ecs_cluster == null ? true : false
   definitions        = concat([var.primary_container_definition], var.extra_container_definitions)
   volumes = distinct(flatten([
     for def in local.definitions :
