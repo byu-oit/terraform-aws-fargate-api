@@ -10,6 +10,7 @@ data "aws_region" "current" {}
 
 locals {
   create_new_cluster = var.existing_ecs_cluster == null ? true : false
+  cluster_name       = local.create_new_cluster ? var.app_name : var.existing_ecs_cluster.name
   definitions        = concat([var.primary_container_definition], var.extra_container_definitions)
   volumes = distinct(flatten([
     for def in local.definitions :
@@ -452,7 +453,7 @@ resource "aws_ecs_task_definition" "task_def" {
 # ==================== Fargate ====================
 resource "aws_ecs_cluster" "new_cluster" {
   count = local.create_new_cluster ? 1 : 0 # if cluster is not provided create one
-  name  = var.app_name
+  name  = local.cluster_name
   tags  = var.tags
 }
 resource "aws_security_group" "fargate_service_sg" {
@@ -522,7 +523,7 @@ resource "aws_codedeploy_deployment_group" "deploymentgroup" {
   deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
 
   ecs_service {
-    cluster_name = var.app_name
+    cluster_name = local.cluster_name
     service_name = aws_ecs_service.service.name
   }
 
@@ -581,7 +582,7 @@ resource "aws_appautoscaling_target" "default" {
   count              = var.autoscaling_config != null ? 1 : 0
   min_capacity       = var.autoscaling_config.min_capacity
   max_capacity       = var.autoscaling_config.max_capacity
-  resource_id        = "service/${var.app_name}/${aws_ecs_service.service.name}"
+  resource_id        = "service/${local.cluster_name}/${aws_ecs_service.service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 }
@@ -608,7 +609,7 @@ resource "aws_cloudwatch_metric_alarm" "up" {
   alarm_name = "${var.app_name}-alarm-up"
   namespace  = "AWS/ECS"
   dimensions = {
-    ClusterName = var.app_name
+    ClusterName = local.cluster_name
     ServiceName = aws_ecs_service.service.name
   }
   statistic           = var.scaling_up_metric_alarm_config.statistic
@@ -643,7 +644,7 @@ resource "aws_cloudwatch_metric_alarm" "down" {
   alarm_name = "${var.app_name}-alarm-down"
   namespace  = "AWS/ECS"
   dimensions = {
-    ClusterName = var.app_name
+    ClusterName = local.cluster_name
     ServiceName = aws_ecs_service.service.name
   }
   statistic           = var.scaling_down_metric_alarm_config.statistic
