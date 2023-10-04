@@ -2,11 +2,6 @@ variable "app_name" {
   type        = string
   description = "Application name to name your Fargate API and other resources. Must be <= 24 characters."
 }
-variable "ecs_cluster_name" {
-  type        = string
-  description = "ECS Cluster name to host the fargate server. Defaults to creating its own cluster."
-  default     = null
-}
 variable "primary_container_definition" {
   type = object({
     name                  = string
@@ -49,6 +44,14 @@ variable "extra_container_definitions" {
   }))
   description = "A list of extra container definitions. Defaults to []"
   default     = []
+}
+variable "existing_ecs_cluster" {
+  type = object({
+    arn  = string
+    name = string
+  })
+  default     = null
+  description = "Existing ECS Cluster configuration to host the fargate scheduled task. Defaults to creating its own cluster."
 }
 variable "container_port" {
   type        = number

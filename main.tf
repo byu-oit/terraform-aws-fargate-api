@@ -1,7 +1,7 @@
 terraform {
   required_version = ">= 1.3.0"
   required_providers {
-    aws = ">= 3.69"
+    aws = ">= 4.0"
   }
 }
 
@@ -9,8 +9,8 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  create_new_cluster = var.ecs_cluster_name == null
-  cluster_name       = local.create_new_cluster ? var.app_name : var.ecs_cluster_name
+  create_new_cluster = var.existing_ecs_cluster == null ? true : false
+  cluster_name       = local.create_new_cluster ? var.app_name : var.existing_ecs_cluster.name
   definitions        = concat([var.primary_container_definition], var.extra_container_definitions)
   volumes = distinct(flatten([
     for def in local.definitions :
@@ -452,13 +452,9 @@ resource "aws_ecs_task_definition" "task_def" {
 
 # ==================== Fargate ====================
 resource "aws_ecs_cluster" "new_cluster" {
-  count = local.create_new_cluster ? 1 : 0 # if custer is not provided create one
+  count = local.create_new_cluster ? 1 : 0 # if cluster is not provided create one
   name  = local.cluster_name
   tags  = var.tags
-}
-data "aws_ecs_cluster" "existing_cluster" {
-  count        = local.create_new_cluster ? 0 : 1
-  cluster_name = var.ecs_cluster_name
 }
 resource "aws_security_group" "fargate_service_sg" {
   name        = "${var.app_name}-fargate-sg"
@@ -482,7 +478,7 @@ resource "aws_security_group" "fargate_service_sg" {
 resource "aws_ecs_service" "service" {
   name             = local.service_name
   task_definition  = aws_ecs_task_definition.task_def.arn
-  cluster          = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].id : data.aws_ecs_cluster.existing_cluster[0].id # if cluster is not provided use created one, else use existing cluster
+  cluster          = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].id : var.existing_ecs_cluster.arn # if cluster is not provided use created one, else use existing cluster
   desired_count    = var.autoscaling_config != null ? var.autoscaling_config.min_capacity : 1
   launch_type      = "FARGATE"
   platform_version = var.fargate_platform_version

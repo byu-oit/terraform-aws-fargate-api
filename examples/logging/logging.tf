@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.69"
+      version = "~> 4.0"
     }
   }
 }
@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 module "acs" {
-  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.5.0"
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v4.0.0"
 }
 
 data "aws_caller_identity" "current" {}
@@ -24,10 +24,10 @@ data "aws_elb_service_account" "main" {}
 //  name = "fake-example-cluster"
 //}
 module "fargate_api" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v5.0.2"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.0.0"
   //  source           = "../../" // for local testing
   app_name = "example-api"
-  //  ecs_cluster_name = aws_ecs_cluster.existing.name
+  //ecs_cluster_name = aws_ecs_cluster.existing.name
   container_port = 8000
   primary_container_definition = {
     name  = "example"

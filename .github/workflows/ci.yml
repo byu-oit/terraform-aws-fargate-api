@@ -23,7 +23,7 @@ jobs:
 
       - name: Terraform Format
         working-directory: "./"
-        run: terraform fmt -check -recursive
+        run: terraform fmt -check -recursive -diff
 
   plan:
     name: Terraform Plan
