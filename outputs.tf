@@ -3,7 +3,7 @@ output "fargate_service" {
 }
 
 output "new_ecs_cluster" {
-  value = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0] : var.existing_ecs_cluster.arn
+  value = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0] : null
 }
 
 output "fargate_service_security_group" {
