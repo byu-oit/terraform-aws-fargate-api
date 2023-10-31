@@ -253,10 +253,6 @@ resource "aws_alb_listener" "https" {
         arn    = aws_alb_target_group.blue.arn
         weight = 100
       }
-      target_group {
-        arn    = aws_alb_target_group.green.arn
-        weight = 0
-      }
     }
   }
   lifecycle {
@@ -296,10 +292,6 @@ resource "aws_alb_listener" "test_listener" {
       target_group {
         arn    = aws_alb_target_group.blue.arn
         weight = 100
-      }
-      target_group {
-        arn    = aws_alb_target_group.green.arn
-        weight = 0
       }
     }
   }
