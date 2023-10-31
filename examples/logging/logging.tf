@@ -24,7 +24,7 @@ data "aws_elb_service_account" "main" {}
 //  name = "fake-example-cluster"
 //}
 module "fargate_api" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.0.0"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.0.1"
   //  source           = "../../" // for local testing
   app_name = "example-api"
   //ecs_cluster_name = aws_ecs_cluster.existing.name
