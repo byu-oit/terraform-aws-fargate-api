@@ -99,13 +99,11 @@ variable "task_policies" {
 }
 variable "task_cpu" {
   type        = number
-  description = "CPU for the task definition. Defaults to 256."
-  default     = 256
+  description = "CPU for the task definition."
 }
 variable "task_memory" {
   type        = number
-  description = "Memory for the task definition. Defaults to 512."
-  default     = 512
+  description = "Memory for the task definition."
 }
 variable "cpu_architecture" {
   type        = string
@@ -234,7 +232,7 @@ variable "scaling_up_policy_config" {
     adjustment_type             = "ChangeInCapacity"
     metric_aggregation_type     = "Average"
     cooldown                    = 300
-    scaling_adjustment          = 1
+    scaling_adjustment          = 2
     metric_interval_lower_bound = 0
   }
 }
@@ -249,12 +247,12 @@ variable "scaling_up_metric_alarm_config" {
   })
   description = "Advanced configuration for the scaling up metric alarm if 'autoscaling_config' is in use."
   default = {
-    statistic           = "Average"
+    statistic           = "Maximum"
     metric_name         = "CPUUtilization"
     comparison_operator = "GreaterThanThreshold"
-    threshold           = 75
-    period              = 300
-    evaluation_periods  = 5
+    threshold           = 60
+    period              = 60
+    evaluation_periods  = 1
   }
 }
 variable "scaling_down_policy_config" {
@@ -285,10 +283,10 @@ variable "scaling_down_metric_alarm_config" {
   })
   description = "Advanced configuration for scaling the down metric alarm if 'autoscaling_config' is in use."
   default = {
-    statistic           = "Average"
+    statistic           = "Maximum"
     metric_name         = "CPUUtilization"
     comparison_operator = "LessThanThreshold"
-    threshold           = 25
+    threshold           = 35
     period              = 300
     evaluation_periods  = 5
   }
