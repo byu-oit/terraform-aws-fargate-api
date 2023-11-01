@@ -213,8 +213,8 @@ variable "https_certificate_arn" {
 }
 variable "autoscaling_config" {
   type = object({
-    min_capacity = number
-    max_capacity = number
+    min_capacity          = number
+    max_capacity          = number
     cpu_percentage_target = optional(number, 75)
   })
   description = "Configuration for default autoscaling policies and alarms. Set to null if you want to set up your own autoscaling policies and alarms."

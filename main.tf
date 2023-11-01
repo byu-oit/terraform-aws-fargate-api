@@ -592,7 +592,7 @@ resource "aws_appautoscaling_policy" "default" {
       predefined_metric_type = "ECSServiceAverageCPUUtilization"
     }
 
-    target_value       = var.autoscaling_config.cpu_percentage_target
+    target_value = var.autoscaling_config.cpu_percentage_target
   }
 }
 

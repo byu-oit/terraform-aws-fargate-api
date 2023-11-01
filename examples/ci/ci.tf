@@ -55,6 +55,8 @@ module "fargate_api" {
   }
 
   autoscaling_config            = null
+  task_memory                   = 256
+  task_cpu                      = 512
   codedeploy_test_listener_port = 8443
   codedeploy_lifecycle_hooks = {
     BeforeInstall         = null
