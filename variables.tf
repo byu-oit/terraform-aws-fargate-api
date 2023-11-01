@@ -215,82 +215,12 @@ variable "autoscaling_config" {
   type = object({
     min_capacity = number
     max_capacity = number
+    cpu_percentage_target = optional(number, 75)
   })
   description = "Configuration for default autoscaling policies and alarms. Set to null if you want to set up your own autoscaling policies and alarms."
   default     = null
 }
-variable "scaling_up_policy_config" {
-  type = object({
-    adjustment_type             = string
-    metric_aggregation_type     = string
-    cooldown                    = number
-    scaling_adjustment          = number
-    metric_interval_lower_bound = number
-  })
-  description = "Advanced configuration for the scaling up policy if 'autoscaling_config' is in use."
-  default = {
-    adjustment_type             = "ChangeInCapacity"
-    metric_aggregation_type     = "Average"
-    cooldown                    = 300
-    scaling_adjustment          = 2
-    metric_interval_lower_bound = 0
-  }
-}
-variable "scaling_up_metric_alarm_config" {
-  type = object({
-    statistic           = string
-    metric_name         = string
-    comparison_operator = string
-    threshold           = number
-    period              = number
-    evaluation_periods  = number
-  })
-  description = "Advanced configuration for the scaling up metric alarm if 'autoscaling_config' is in use."
-  default = {
-    statistic           = "Maximum"
-    metric_name         = "CPUUtilization"
-    comparison_operator = "GreaterThanThreshold"
-    threshold           = 60
-    period              = 60
-    evaluation_periods  = 1
-  }
-}
-variable "scaling_down_policy_config" {
-  type = object({
-    adjustment_type             = string
-    metric_aggregation_type     = string
-    cooldown                    = number
-    scaling_adjustment          = number
-    metric_interval_upper_bound = number
-  })
-  description = "Advanced configuration for the scaling down policy if 'autoscaling_config' is in use."
-  default = {
-    adjustment_type             = "ChangeInCapacity"
-    metric_aggregation_type     = "Average"
-    cooldown                    = 300
-    scaling_adjustment          = -1
-    metric_interval_upper_bound = 0
-  }
-}
-variable "scaling_down_metric_alarm_config" {
-  type = object({
-    statistic           = string
-    metric_name         = string
-    comparison_operator = string
-    threshold           = number
-    period              = number
-    evaluation_periods  = number
-  })
-  description = "Advanced configuration for scaling the down metric alarm if 'autoscaling_config' is in use."
-  default = {
-    statistic           = "Maximum"
-    metric_name         = "CPUUtilization"
-    comparison_operator = "LessThanThreshold"
-    threshold           = 35
-    period              = 300
-    evaluation_periods  = 5
-  }
-}
+
 variable "log_group_name" {
   type        = string
   description = "CloudWatch log group name."

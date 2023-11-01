@@ -68,8 +68,8 @@ module "my_app" {
 * CodeDeploy Group
 * DNS A-Record
 * AutoScaling Target
-* AutoScaling Policies (one for stepping up and one for stepping down)
-* CloudWatch Metric Alarms (one for stepping up and one for stepping down)
+* AutoScaling Policy
+* CloudWatch Metric Alarms - Managed by AWS not terraform
 
 ## Requirements
 
@@ -114,11 +114,7 @@ module "my_app" {
 | overwrite_records                 | bool                                        | Allow creation of Route53 records in Terraform to overwrite an existing record, if any.                                                                                                                                                                                                                                                                                                              | false                                                                                  |
 | hosted_zone                       | [object](#hosted_zone)                      | Hosted Zone object to redirect to ALB. (Can pass in the aws_hosted_zone object). A and AAAA records created in this hosted zone                                                                                                                                                                                                                                                                      |                                                                                        |
 | https_certificate_arn             | string                                      | ARN of the HTTPS certificate of the hosted zone/domain                                                                                                                                                                                                                                                                                                                                               |                                                                                        |
-| autoscaling_config                | [object](#autoscaling_config)               | Configuration for default autoscaling policies and alarms. Additional advanced scaling options, which are optional, can be made with the "scaling_up_policy_config", "scaling_up_metric_alarm_config", "scaling_down_policy_config", and "scaling_down_metric_alarm_config" variables. Omit or set to `null` if you want to set up your own autoscaling policies and alarms.                         | `null`                                                                                 |
-| scaling_up_policy_config          | [object](#scaling_up_policy_config)         | Optional advanced configuration for the scaling up policy if 'autoscaling_config' is in use.                                                                                                                                                                                                                                                                                                         | See object definition [object](#scaling_up_policy_config)                              |                                                                        
-| scaling_up_metric_alarm_config    | [object](#scaling_up_metric_alarm_config)   | Optional advanced configuration for the scaling up metric alarm if 'autoscaling_config' is in use.                                                                                                                                                                                                                                                                                                   | See object definition [object](#scaling_up_metric_alarm_config)                        |                                                                        
-| scaling_down_policy_config        | [object](#scaling_down_policy_config)       | Optional advanced configuration for the scaling down policy if 'autoscaling_config' is in use.                                                                                                                                                                                                                                                                                                       | See object definition [object](#scaling_down_policy_config)                            |                                                                        
-| scaling_down_metric_alarm_config  | [object](#scaling_down_metric_alarm_config) | Optional advanced configuration for scaling the down metric alarm if 'autoscaling_config' is in use."                                                                                                                                                                                                                                                                                                | See object definition [object](#scaling_down_metric_alarm_config)                      |
+| autoscaling_config                | [object](#autoscaling_config)               | Configuration for default autoscaling policies and alarms. Omit or set to `null` if you want to set up your own autoscaling policies and alarms.                         | `null`                                                                                 |
 | log_group_name                    | string                                      | CloudWatch log group name.                                                                                                                                                                                                                                                                                                                                                                           |                                                                                        |
 | log_retention_in_days             | number                                      | CloudWatch log group retention in days                                                                                                                                                                                                                                                                                                                                                               | 120                                                                                    |
 | tags                              | map(string)                                 | A map of AWS Tags to attach to each resource created                                                                                                                                                                                                                                                                                                                                                 | `null`                                                                                 |
@@ -220,6 +216,7 @@ autoscaling policies.
 * **`min_capacity`** - (Required) Minimum task count for autoscaling (this will also be used to define the initial
   desired count of the ECS Fargate Service)
 * **`max_capacity`** - (Required) Maximum task count for autoscaling
+* **`cpu_percentage_target`** (Optional) What the desired average CPU percentage is
 
 **Note:** If you want to define your own autoscaling policies/alarms then you need to set this field to `null` at which
 point this module will not create any policies/alarms.
@@ -227,99 +224,7 @@ point this module will not create any policies/alarms.
 **Note:** the desired count of the ECS Fargate Service will be set the first time terraform runs but changes to desired
 count will be ignored after the first time.
 
-#### scaling_up_policy_config
 
-This will allow the scaling up policy to be configured if necessary.
-
-* **`adjustment_type`** - (Required) Specifies whether the adjustment is an absolute number or a percentage of the
-  current capacity.
-* **`metric_aggregation_type`** - (Required) The aggregation type for the policy's metrics.
-* **`cooldown`** - (Required) The amount of time, in seconds, after a scaling activity completes and before the next
-  scaling activity can start.
-* **`scaling_adjustment`** - (Required) The number of members by which to scale, when the adjustment bounds are
-  breached. A positive value scales up. A negative value scales down.
-* **`metric_interval_lower_bound`** - (Required) The lower bound for the difference between the alarm threshold and the
-  CloudWatch metric.
-* Default:
-  ```
-    {
-      adjustment_type             = "ChangeInCapacity"
-      metric_aggregation_type     = "Average"
-      cooldown                    = 300
-      scaling_adjustment          = 1
-      metric_interval_lower_bound = 0
-    }
-  ```
-
-#### scaling_down_policy_config
-
-This will allow the scaling down policy to be configured if necessary.
-
-* **`adjustment_type`** - (Required) Specifies whether the adjustment is an absolute number or a percentage of the
-  current capacity.
-* **`metric_aggregation_type`** - (Required) The aggregation type for the policy's metrics.
-* **`cooldown`** - (Required) The amount of time, in seconds, after a scaling activity completes and before the next
-  scaling activity can start.
-* **`scaling_adjustment`** - (Required) The number of members by which to scale, when the adjustment bounds are
-  breached. A positive value scales up. A negative value scales down.
-* **`metric_interval_upper_bound`** - The upper bound for the difference between the alarm threshold and the CloudWatch
-  metric.
-* Default:
-  ```
-    {
-      adjustment_type             = "ChangeInCapacity"
-      metric_aggregation_type     = "Average"
-      cooldown                    = 300
-      scaling_adjustment          = -1
-      metric_interval_upper_bound = 0
-    }
-  ```
-
-#### scaling_up_metric_alarm_config
-
-This will allow the scaling up alarm to be configured if necessary.
-
-* **`statistic`** - (Required) The statistic to apply to the alarm's associated metric.
-* **`metric_name`** - (Required) The name for the alarm's associated metric.
-* **`comparison_operator`** - (Required) The arithmetic operation to use when comparing the specified Statistic and
-  Threshold.
-* **`threshold`** - (Required) The value against which the specified statistic is compared.
-* **`period`** - (Required) The period in seconds over which the specified statistic is applied.
-* **`evaluation_periods`** - (Required) The number of periods over which data is compared to the specified threshold.
-* Default:
-  ```
-    {
-      statistic           = "Average"
-      metric_name         = "CPUUtilization"
-      comparison_operator = "GreaterThanThreshold"
-      threshold           = 75
-      period              = 300
-      evaluation_periods  = 5
-    }
-  ```
-
-#### scaling_down_metric_alarm_config
-
-This will allow the scaling down alarm to be configured if necessary.
-
-* **`statistic`** - (Required) The statistic to apply to the alarm's associated metric.
-* **`metric_name`** - (Required) The name for the alarm's associated metric.
-* **`comparison_operator`** - (Required) The arithmetic operation to use when comparing the specified Statistic and
-  Threshold.
-* **`threshold`** - (Required) The value against which the specified statistic is compared.
-* **`period`** - (Required) The period in seconds over which the specified statistic is applied.
-* **`evaluation_periods`** - (Required) The number of periods over which data is compared to the specified threshold.
-* Default:
-  ```
-    {
-      statistic           = "Average"
-      metric_name         = "CPUUtilization"
-      comparison_operator = "LessThanThreshold"
-      threshold           = 25
-      period              = 300
-      evaluation_periods  = 5
-    }
-  ```
 
 #### CloudWatch logs
 
@@ -344,8 +249,7 @@ with the container logs in `example-api/example/12d344fd34b556ae4326...`
 | alb_target_group_green         | [object](https://www.terraform.io/docs/providers/aws/r/lb_target_group.html#attributes-reference)                   | The Application Load Balancer Target Group (ALB Target Group) object  for the green deployment |
 | alb_security_group             | [object](https://www.terraform.io/docs/providers/aws/r/security_group.html#attributes-reference)                    | The ALB's security group object                                                                |
 | dns_record                     | [object](https://www.terraform.io/docs/providers/aws/r/route53_record.html#attributes-reference)                    | The DNS A-record mapped to the ALB                                                             | 
-| autoscaling_step_up_policy     | [object](https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#attributes-reference)                | Autoscaling policy to step up                                                                  |
-| autoscaling_step_down_policy   | [object](https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#attributes-reference)                | Autoscaling policy to step down                                                                |
+| autoscaling_policy             | [object](https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#attributes-reference)                | Autoscaling policy to step up                                                                  |
 | task_role                      | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | IAM role created for the tasks.                                                                |
 | task_execution_role            | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | IAM role created for the execution of tasks.                                                   |
 

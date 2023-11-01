@@ -578,76 +578,24 @@ resource "aws_appautoscaling_target" "default" {
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 }
-resource "aws_appautoscaling_policy" "up" {
+
+resource "aws_appautoscaling_policy" "default" {
   count              = var.autoscaling_config != null ? 1 : 0
-  name               = "${var.app_name}-autoscale-up"
+  name               = "${var.app_name}-tracking-autoscale"
+  policy_type        = "TargetTrackingScaling"
   resource_id        = aws_appautoscaling_target.default[0].resource_id
   scalable_dimension = aws_appautoscaling_target.default[0].scalable_dimension
   service_namespace  = aws_appautoscaling_target.default[0].service_namespace
 
-  step_scaling_policy_configuration {
-    adjustment_type         = var.scaling_up_policy_config.adjustment_type
-    metric_aggregation_type = var.scaling_up_policy_config.metric_aggregation_type
-    cooldown                = var.scaling_up_policy_config.cooldown
-
-    step_adjustment {
-      scaling_adjustment          = var.scaling_up_policy_config.scaling_adjustment
-      metric_interval_lower_bound = var.scaling_up_policy_config.metric_interval_lower_bound
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
     }
-  }
-}
-resource "aws_cloudwatch_metric_alarm" "up" {
-  count      = var.autoscaling_config != null ? 1 : 0
-  alarm_name = "${var.app_name}-alarm-up"
-  namespace  = "AWS/ECS"
-  dimensions = {
-    ClusterName = local.cluster_name
-    ServiceName = aws_ecs_service.service.name
-  }
-  statistic           = var.scaling_up_metric_alarm_config.statistic
-  metric_name         = var.scaling_up_metric_alarm_config.metric_name
-  comparison_operator = var.scaling_up_metric_alarm_config.comparison_operator
-  threshold           = var.scaling_up_metric_alarm_config.threshold
-  period              = var.scaling_up_metric_alarm_config.period
-  evaluation_periods  = var.scaling_up_metric_alarm_config.evaluation_periods
-  alarm_actions       = [aws_appautoscaling_policy.up[0].arn]
-  tags                = var.tags
-}
-resource "aws_appautoscaling_policy" "down" {
-  count              = var.autoscaling_config != null ? 1 : 0
-  name               = "${var.app_name}-autoscale-down"
-  resource_id        = aws_appautoscaling_target.default[0].resource_id
-  scalable_dimension = aws_appautoscaling_target.default[0].scalable_dimension
-  service_namespace  = aws_appautoscaling_target.default[0].service_namespace
 
-  step_scaling_policy_configuration {
-    adjustment_type         = var.scaling_down_policy_config.adjustment_type
-    metric_aggregation_type = var.scaling_down_policy_config.metric_aggregation_type
-    cooldown                = var.scaling_down_policy_config.cooldown
+    target_value       = var.autoscaling_config.cpu_percentage_target
+  }
+}
 
-    step_adjustment {
-      scaling_adjustment          = var.scaling_down_policy_config.scaling_adjustment
-      metric_interval_upper_bound = var.scaling_down_policy_config.metric_interval_upper_bound
-    }
-  }
-}
-resource "aws_cloudwatch_metric_alarm" "down" {
-  count      = var.autoscaling_config != null ? 1 : 0
-  alarm_name = "${var.app_name}-alarm-down"
-  namespace  = "AWS/ECS"
-  dimensions = {
-    ClusterName = local.cluster_name
-    ServiceName = aws_ecs_service.service.name
-  }
-  statistic           = var.scaling_down_metric_alarm_config.statistic
-  metric_name         = var.scaling_down_metric_alarm_config.metric_name
-  comparison_operator = var.scaling_down_metric_alarm_config.comparison_operator
-  threshold           = var.scaling_down_metric_alarm_config.threshold
-  period              = var.scaling_down_metric_alarm_config.period
-  evaluation_periods  = var.scaling_down_metric_alarm_config.evaluation_periods
-  alarm_actions       = [aws_appautoscaling_policy.down[0].arn]
-  tags                = var.tags
-}
 
 # ==================== AppSpec file ====================
 resource "local_file" "appspec_json" {
