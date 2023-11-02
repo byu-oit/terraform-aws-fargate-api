@@ -216,6 +216,8 @@ variable "autoscaling_config" {
     min_capacity          = number
     max_capacity          = number
     cpu_percentage_target = optional(number, 75)
+    scale_in_cooldown     = optional(number, 1800) # 30 minutes to scale down
+    scale_out_cooldown    = optional(number)
   })
   description = "Configuration for default autoscaling policies and alarms. Set to null if you want to set up your own autoscaling policies and alarms."
   default     = null
