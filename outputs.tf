@@ -47,7 +47,7 @@ output "cloudwatch_log_group" {
 }
 
 output "autoscaling_policy" {
-  value = var.autoscaling_config != null ? aws_appautoscaling_policy.default : null
+  value = var.autoscaling_config != null ? aws_appautoscaling_policy.default[0] : null
 }
 
 output "task_role" {

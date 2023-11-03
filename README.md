@@ -211,12 +211,15 @@ following attributes:
 #### autoscaling_config
 
 This module will create basic default autoscaling policies and alarms and you can define some variables of these default
-autoscaling policies.
+autoscaling policies. The underlying mechanism for scaling is a [Target tracking scaling policy](https://docs.aws.amazon.com/AmazonECS/latest/userguide/service-autoscaling-targettracking.html).
 
 * **`min_capacity`** - (Required) Minimum task count for autoscaling (this will also be used to define the initial
   desired count of the ECS Fargate Service)
 * **`max_capacity`** - (Required) Maximum task count for autoscaling
-* **`cpu_percentage_target`** (Optional) What the desired average CPU percentage is
+* **`metric_type`** - (Optional) The Metric Type for scaling. Either `ECSServiceAverageCPUUtilization` or `ECSServiceAverageMemoryUtilization`. Defaults to `ECSServiceAverageMemoryUtilization`.
+* **`target_value`** (Required) Target value for the metric. That value represents the ideal average utilization or throughput level for your application for the chosen metric.
+* **`scale_in_cooldown`** (Optional) Amount of time, in seconds, after a scale in activity completes before another scale in activity can start. Defaults to `300`
+* **`scale_out_cooldown`** (Optional) Amount of time, in seconds, after a scale out activity completes before another scale out activity can start. Defaults to `60`.
 
 **Note:** If you want to define your own autoscaling policies/alarms then you need to set this field to `null` at which
 point this module will not create any policies/alarms.
