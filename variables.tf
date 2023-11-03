@@ -215,7 +215,7 @@ variable "autoscaling_config" {
   type = object({
     min_capacity       = number
     max_capacity       = number
-    metric_type        = optional(string, "ECSServiceAverageCPUUtilization")
+    target_metric      = string
     target_value       = number
     scale_in_cooldown  = optional(number, 300) # 5 minutes between scale down actions
     scale_out_cooldown = optional(number, 60)  # 1 minute between scale up actions
