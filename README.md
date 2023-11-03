@@ -69,7 +69,7 @@ module "my_app" {
 * DNS A-Record
 * AutoScaling Target
 * AutoScaling Policy
-* CloudWatch Metric Alarms - Managed by AWS not terraform
+* CloudWatch Metric Alarms - Managed by AWS as a part of the Scaling Policy, and not by Terraform directly
 
 ## Requirements
 
