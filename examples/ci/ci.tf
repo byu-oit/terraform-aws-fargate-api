@@ -55,6 +55,8 @@ module "fargate_api" {
   }
 
   autoscaling_config            = null
+  task_memory                   = 256
+  task_cpu                      = 512
   codedeploy_test_listener_port = 8443
   codedeploy_lifecycle_hooks = {
     BeforeInstall         = null
@@ -131,12 +133,8 @@ output "cloudwatch_log_group" {
   value = module.fargate_api.cloudwatch_log_group.arn
 }
 
-output "autoscaling_step_up_policy" {
-  value = module.fargate_api.autoscaling_step_up_policy
-}
-
-output "autoscaling_step_down_policy" {
-  value = module.fargate_api.autoscaling_step_down_policy
+output "autoscaling_policy" {
+  value = module.fargate_api.autoscaling_policy
 }
 
 output "task_role" {
