@@ -474,6 +474,7 @@ resource "aws_ecs_service" "service" {
   desired_count    = var.autoscaling_config != null ? var.autoscaling_config.min_capacity : 1
   launch_type      = "FARGATE"
   platform_version = var.fargate_platform_version
+  propagate_tags   = "TASK_DEFINITION"
   deployment_controller {
     type = "CODE_DEPLOY"
   }
