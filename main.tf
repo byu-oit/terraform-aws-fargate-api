@@ -144,7 +144,7 @@ resource "aws_alb" "alb" {
   security_groups        = [aws_security_group.alb-sg.id]
   tags                   = var.tags
   internal               = var.alb_internal_flag
-  idle_timeout           = var.lb_idle_timeout
+  idle_timeout           = var.alb_idle_timeout
 
   access_logs {
     bucket  = var.lb_logging_bucket_name
