@@ -320,7 +320,7 @@ variable "lb_logging_bucket_name" {
 }
 variable "lb_idle_timeout" {
   type        = number
-  description = "The time in seconds that the connection is allowed to be idle."
+  description = "The time in seconds that the connection is allowed to be idle. Defaults to 60 seconds."
   default     = null
 }
 variable "fargate_platform_version" { # TODO: Add string validation to check for 1.3.0, 1.4.0, or LATEST
