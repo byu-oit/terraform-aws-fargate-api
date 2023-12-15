@@ -142,7 +142,11 @@ variable "alb_sg_ingress_sg_ids" {
   description = "List of security groups to allow ingress"
   default     = []
 }
-
+variable "alb_idle_timeout" {
+  type        = number
+  description = "The time in seconds that the connection is allowed to be idle. Defaults to 60 seconds."
+  default     = null
+}
 variable "private_subnet_ids" {
   type        = list(string)
   description = "List of subnet IDs for the fargate service."
