@@ -13,7 +13,7 @@ customized solution you may need to use this code more as a pattern or guideline
 
 ```hcl
 module "my_app" {
-  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.1.0"
+  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.1.1"
   app_name                     = "example-api"
   container_port               = 8000
   primary_container_definition = {
