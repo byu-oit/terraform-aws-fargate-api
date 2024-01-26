@@ -502,6 +502,11 @@ resource "aws_ecs_service" "service" {
       network_configuration // ignore because it has to be managed by codedeploy
     ]
   }
+  // If the target groups get re-created, the service needs to be re-created or CodeDeploy will fail
+  depends_on = [
+    aws_alb_target_group.blue,
+    aws_alb_target_group.green
+  ]
 }
 
 # ==================== CodeDeploy ====================
