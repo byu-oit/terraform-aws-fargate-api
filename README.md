@@ -51,6 +51,10 @@ module "my_app" {
   }
 }
 ```
+> **Note**
+> 
+> * If your application's URL is a subdomain within your AWS account's default hosted zone, you must input both the default Route53 zone object and the default zone's ACM certificate arn from the [terraform-aws-acs-info module's](https://github.com/byu-oit/terraform-aws-acs-info) output. This is shown in the example above.
+> * If your application requires a custom URL outside your AWS account's default hosted zone, input a custom `hosted_zone` and do not input `https_certificate_arn`. The module will create an ACM certificate for your custom hosted zone.
 
 ## Created Resources
 
