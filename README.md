@@ -67,6 +67,8 @@ module "my_app" {
     * with IAM role
 * CodeDeploy Group
 * DNS A-Record
+* HTTPS Certificate (if not provided)
+  * with DNS validation record
 * AutoScaling Target
 * AutoScaling Policies (one for stepping up and one for stepping down)
 * CloudWatch Metric Alarms (one for stepping up and one for stepping down)
