@@ -9,10 +9,10 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  create_new_cluster = var.existing_ecs_cluster == null ? true : false
+  create_new_cluster    = var.existing_ecs_cluster == null ? true : false
   create_new_https_cert = var.https_certificate_arn == null ? true : false
-  cluster_name       = local.create_new_cluster ? var.app_name : var.existing_ecs_cluster.name
-  definitions        = concat([var.primary_container_definition], var.extra_container_definitions)
+  cluster_name          = local.create_new_cluster ? var.app_name : var.existing_ecs_cluster.name
+  definitions           = concat([var.primary_container_definition], var.extra_container_definitions)
   volumes = distinct(flatten([
     for def in local.definitions :
     def.efs_volume_mounts != null ? def.efs_volume_mounts : []
@@ -247,7 +247,7 @@ resource "aws_alb_listener" "https" {
   load_balancer_arn = aws_alb.alb.arn
   port              = 443
   protocol          = "HTTPS"
-  certificate_arn   = var.https_certificate_arn
+  certificate_arn   = local.create_new_https_cert ? aws_acm_certificate.new_cert[0].arn : var.https_certificate_arn # if cert is not provided use created one, else use existing cert
   default_action {
     type = "forward"
     forward {
@@ -287,7 +287,7 @@ resource "aws_alb_listener" "test_listener" {
   load_balancer_arn = aws_alb.alb.arn
   port              = var.codedeploy_test_listener_port
   protocol          = "HTTPS"
-  certificate_arn   = var.https_certificate_arn
+  certificate_arn   = local.create_new_https_cert ? aws_acm_certificate.new_cert[0].arn : var.https_certificate_arn # if cert is not provided use created one, else use existing cert
   default_action {
     type = "forward"
     forward {
@@ -311,16 +311,16 @@ resource "aws_alb_listener" "test_listener" {
 }
 
 # ==================== HTTPS cert ====================
-resource "aws_acm_certificate" "cert" {
-  count = local.create_new_https_cert ? 1 : 0 # if https cert is not provided, then create one
+resource "aws_acm_certificate" "new_cert" {
+  count             = local.create_new_https_cert ? 1 : 0 # if https cert is not provided, then create one
   domain_name       = var.site_url
   validation_method = "DNS"
 }
 
-resource "aws_acm_certificate_validation" "cert" {
-  count = aws_acm_certificate.cert.count
-  certificate_arn         = aws_acm_certificate.cert.arn
-  validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
+resource "aws_acm_certificate_validation" "new_cert" {
+  count                   = local.create_new_https_cert ? 1 : 0 # if https cert is not provided, then create a validation
+  certificate_arn         = aws_acm_certificate.new_cert[0].arn
+  validation_record_fqdns = [for record in aws_route53_record.new_cert_validation : record.fqdn]
 }
 
 # ==================== Route53 ====================
@@ -346,15 +346,14 @@ resource "aws_route53_record" "aaaa_record" {
     zone_id                = aws_alb.alb.zone_id
   }
 }
-resource "aws_route53_record" "cert_validation" {
-  for_each = {
-    for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
-      count = aws_acm_certificate.cert.count
+resource "aws_route53_record" "new_cert_validation" {
+  for_each = local.create_new_https_cert ? { # if https cert is not provided, then create validation records
+    for dvo in aws_acm_certificate.new_cert[0].domain_validation_options : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
     }
-  }
+  } : {}
 
   name    = each.value.name
   type    = each.value.type
