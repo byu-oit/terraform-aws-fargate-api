@@ -247,7 +247,7 @@ resource "aws_alb_listener" "https" {
   load_balancer_arn = aws_alb.alb.arn
   port              = 443
   protocol          = "HTTPS"
-  certificate_arn   = local.create_new_https_cert ? aws_acm_certificate.new_cert[0].arn : var.https_certificate_arn # if cert is not provided use created one, else use existing cert
+  certificate_arn   = local.create_new_https_cert ? aws_acm_certificate_validation.new_cert[0].certificate_arn : var.https_certificate_arn # if cert is not provided use created one, else use existing cert
   default_action {
     type = "forward"
     forward {
@@ -287,7 +287,7 @@ resource "aws_alb_listener" "test_listener" {
   load_balancer_arn = aws_alb.alb.arn
   port              = var.codedeploy_test_listener_port
   protocol          = "HTTPS"
-  certificate_arn   = local.create_new_https_cert ? aws_acm_certificate.new_cert[0].arn : var.https_certificate_arn # if cert is not provided use created one, else use existing cert
+  certificate_arn   = local.create_new_https_cert ? aws_acm_certificate_validation.new_cert[0].certificate_arn : var.https_certificate_arn # if cert is not provided use created one, else use existing cert
   default_action {
     type = "forward"
     forward {
