@@ -10,6 +10,7 @@ data "aws_region" "current" {}
 
 locals {
   create_new_cluster = var.existing_ecs_cluster == null ? true : false
+  create_new_https_cert = var.https_certificate_arn == null ? true : false
   cluster_name       = local.create_new_cluster ? var.app_name : var.existing_ecs_cluster.name
   definitions        = concat([var.primary_container_definition], var.extra_container_definitions)
   volumes = distinct(flatten([
@@ -309,6 +310,19 @@ resource "aws_alb_listener" "test_listener" {
   ]
 }
 
+# ==================== HTTPS cert ====================
+resource "aws_acm_certificate" "cert" {
+  count = local.create_new_https_cert ? 1 : 0 # if https cert is not provided, then create one
+  domain_name       = var.site_url
+  validation_method = "DNS"
+}
+
+resource "aws_acm_certificate_validation" "cert" {
+  count = aws_acm_certificate.cert.count
+  certificate_arn         = aws_acm_certificate.cert.arn
+  validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
+}
+
 # ==================== Route53 ====================
 resource "aws_route53_record" "a_record" {
   name            = local.app_domain_url
@@ -331,6 +345,22 @@ resource "aws_route53_record" "aaaa_record" {
     name                   = aws_alb.alb.dns_name
     zone_id                = aws_alb.alb.zone_id
   }
+}
+resource "aws_route53_record" "cert_validation" {
+  for_each = {
+    for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
+      count = aws_acm_certificate.cert.count
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+
+  name    = each.value.name
+  type    = each.value.type
+  zone_id = var.hosted_zone.id
+  records = [each.value.record]
+  ttl     = 60
 }
 
 # ==================== Task Definition ====================
