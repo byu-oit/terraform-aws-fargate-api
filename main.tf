@@ -313,7 +313,7 @@ resource "aws_alb_listener" "test_listener" {
 # ==================== HTTPS cert ====================
 resource "aws_acm_certificate" "new_cert" {
   count             = local.create_new_https_cert ? 1 : 0 # if https cert is not provided, then create one
-  domain_name       = var.site_url
+  domain_name       = local.app_domain_url
   validation_method = "DNS"
 }
 
