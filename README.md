@@ -13,7 +13,7 @@ customized solution you may need to use this code more as a pattern or guideline
 
 ```hcl
 module "my_app" {
-  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.1.3"
+  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.2.0"
   app_name                     = "example-api"
   container_port               = 8000
   primary_container_definition = {
@@ -141,7 +141,7 @@ Object with following attributes to define an existing ECS cluster to deploy the
 If you want to deploy this scheduled fargate task onto an existing cluster you would need to define this variable. For example:
 ```hcl
 module "test_api" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.1.1"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.2.0"
   app_name             = "example-api"
   existing_ecs_cluster = {
     arn  = aws_ecs_cluster.my_cluster.arn
