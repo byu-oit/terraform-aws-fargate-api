@@ -13,7 +13,7 @@ customized solution you may need to use this code more as a pattern or guideline
 
 ```hcl
 module "my_app" {
-  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.1.2"
+  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.1.3"
   app_name                     = "example-api"
   container_port               = 8000
   primary_container_definition = {
@@ -51,6 +51,9 @@ module "my_app" {
   }
 }
 ```
+> **Note**
+> * If your application's `site_url` is a subdomain within your AWS account's default hosted zone, you must input both the default `hosted_zone` and `https_certificate_arn` from the [terraform-aws-acs-info module's](https://github.com/byu-oit/terraform-aws-acs-info) output. This is shown in the example above.
+> * If your application requires a custom `site_url` outside of your AWS account's default hosted zone, input your custom `hosted_zone` and do not input `https_certificate_arn`. The module will create an ACM certificate for your custom domain.
 
 ## Created Resources
 
@@ -67,6 +70,8 @@ module "my_app" {
     * with IAM role
 * CodeDeploy Group
 * DNS A-Record
+* HTTPS Certificate (if not provided)
+  * with DNS validation record
 * AutoScaling Target
 * AutoScaling Policies (one for stepping up and one for stepping down)
 * CloudWatch Metric Alarms (one for stepping up and one for stepping down)
@@ -114,7 +119,7 @@ module "my_app" {
 | site_url                          | string                                      | The URL for the site.                                                                                                                                                                                                                                                                                                                                                                                | Concatenates app_name with hosted_zone_name.                                           |
 | overwrite_records                 | bool                                        | Allow creation of Route53 records in Terraform to overwrite an existing record, if any.                                                                                                                                                                                                                                                                                                              | false                                                                                  |
 | hosted_zone                       | [object](#hosted_zone)                      | Hosted Zone object to redirect to ALB. (Can pass in the aws_hosted_zone object). A and AAAA records created in this hosted zone                                                                                                                                                                                                                                                                      |                                                                                        |
-| https_certificate_arn             | string                                      | ARN of the HTTPS certificate of the hosted zone/domain                                                                                                                                                                                                                                                                                                                                               |                                                                                        |
+| https_certificate_arn             | string                                      | ARN of the HTTPS certificate of the hosted zone/domain. Defaults to creating its own certificate.                                                                                                                                                                                                                                                                                                    | `null`                                                                                  |
 | autoscaling_config                | [object](#autoscaling_config)               | Configuration for default autoscaling policies and alarms. Additional advanced scaling options, which are optional, can be made with the "scaling_up_policy_config", "scaling_up_metric_alarm_config", "scaling_down_policy_config", and "scaling_down_metric_alarm_config" variables. Omit or set to `null` if you want to set up your own autoscaling policies and alarms.                         | `null`                                                                                 |
 | scaling_up_policy_config          | [object](#scaling_up_policy_config)         | Optional advanced configuration for the scaling up policy if 'autoscaling_config' is in use.                                                                                                                                                                                                                                                                                                         | See object definition [object](#scaling_up_policy_config)                              |                                                                        
 | scaling_up_metric_alarm_config    | [object](#scaling_up_metric_alarm_config)   | Optional advanced configuration for the scaling up metric alarm if 'autoscaling_config' is in use.                                                                                                                                                                                                                                                                                                   | See object definition [object](#scaling_up_metric_alarm_config)                        |                                                                        

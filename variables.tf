@@ -215,7 +215,8 @@ variable "hosted_zone" {
 }
 variable "https_certificate_arn" {
   type        = string
-  description = "ARN of the HTTPS certificate of the hosted zone/domain."
+  default     = null
+  description = "ARN of the HTTPS certificate of the hosted zone/domain. Defaults to creating its own certificate."
 }
 variable "autoscaling_config" {
   type = object({
