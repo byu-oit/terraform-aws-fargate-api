@@ -7,6 +7,8 @@ variable "primary_container_definition" {
     name                  = string
     image                 = string
     ports                 = list(number)
+    entry_point           = optional(list(string))
+    command               = optional(list(string))
     environment_variables = optional(map(string))
     secrets               = optional(map(string))
     efs_volume_mounts = optional(list(object({
@@ -28,6 +30,8 @@ variable "extra_container_definitions" {
     name                  = string
     image                 = string
     ports                 = list(number)
+    entry_point           = optional(list(string))
+    command               = optional(list(string))
     environment_variables = optional(map(string))
     secrets               = optional(map(string))
     efs_volume_mounts = optional(list(object({
