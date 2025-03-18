@@ -38,6 +38,8 @@ locals {
     for def in local.definitions : {
       name       = def.name
       image      = def.image
+      entryPoint = def.entry_point
+      command    = def.command
       essential  = true
       privileged = false
       portMappings = [
@@ -92,6 +94,8 @@ locals {
   xray_container = [{
     name       = "${var.app_name}-xray"
     image      = "public.ecr.aws/xray/aws-xray-daemon:3.x"
+    entryPoint = null
+    command    = null
     essential  = true
     privileged = false
     portMappings = [{
