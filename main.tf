@@ -38,6 +38,8 @@ locals {
     for def in local.definitions : {
       name       = def.name
       image      = def.image
+      entryPoint = def.entry_point
+      command    = def.command
       essential  = true
       privileged = false
       portMappings = [
