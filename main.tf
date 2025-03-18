@@ -115,7 +115,7 @@ locals {
     volumesFrom = []
     ulimits     = []
   }]
-  container_definitions = var.xray_enabled == true ? concat(local.user_containers, local.xray_container) : local.user_containers
+  container_definitions = var.xray_enabled == true ? tolist(concat(local.user_containers, local.xray_container)) : tolist(local.user_containers)
 
   hooks = var.codedeploy_lifecycle_hooks != null ? setsubtract([
     for hook in keys(var.codedeploy_lifecycle_hooks) :
