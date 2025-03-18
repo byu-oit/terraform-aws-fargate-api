@@ -13,7 +13,7 @@ customized solution you may need to use this code more as a pattern or guideline
 
 ```hcl
 module "my_app" {
-  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.2.0"
+  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.3.0"
   app_name                     = "example-api"
   container_port               = 8000
   primary_container_definition = {
@@ -141,7 +141,7 @@ Object with following attributes to define an existing ECS cluster to deploy the
 If you want to deploy this scheduled fargate task onto an existing cluster you would need to define this variable. For example:
 ```hcl
 module "test_api" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.2.0"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.3.0"
   app_name             = "example-api"
   existing_ecs_cluster = {
     arn  = aws_ecs_cluster.my_cluster.arn
@@ -158,6 +158,8 @@ Object with following attributes to define the docker container(s) your fargate 
 * **`name`** - (Required) container name (referenced in CloudWatch logs, and possibly by other containers)
 * **`image`** - (Required) the ecr_image_url with the tag like: `<acct_num>.dkr.ecr.us-west-2.amazonaws.com/myapp:dev`
   or the image URL from dockerHub or some other docker registry
+* **`entryPoint`** - the [entrypoint](https://docs.docker.com/engine/reference/run/#entrypoint-default-command-to-execute-at-runtime) to run the docker container with. Can omit or set to `null` to use the default container command.
+* **`command`** - the [command](https://docs.docker.com/engine/reference/run/#cmd-default-command-or-options) to run the docker container with. Can omit or set to `null` to use the default container command.
 * **`ports`** - (Required) a list of ports this container is listening on
 * **`environment_variables`** - a map of environment variables to pass to the docker container
 * **`secrets`** - a map of secrets from the parameter store to be assigned to env variables

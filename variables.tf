@@ -6,6 +6,8 @@ variable "primary_container_definition" {
   type = object({
     name                  = string
     image                 = string
+    entry_point           = optional(list(string))
+    command               = optional(list(string))
     ports                 = list(number)
     environment_variables = optional(map(string))
     secrets               = optional(map(string))
@@ -27,6 +29,8 @@ variable "extra_container_definitions" {
   type = list(object({
     name                  = string
     image                 = string
+    entry_point           = optional(list(string))
+    command               = optional(list(string))
     ports                 = list(number)
     environment_variables = optional(map(string))
     secrets               = optional(map(string))
