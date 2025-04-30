@@ -460,6 +460,7 @@ resource "aws_ecs_task_definition" "task_def" {
     cpu_architecture        = var.cpu_architecture
   }
   requires_compatibilities = ["FARGATE"]
+  skip_destroy             = true
   execution_role_arn       = aws_iam_role.task_execution_role.arn
   task_role_arn            = aws_iam_role.task_role.arn
   tags                     = var.tags
