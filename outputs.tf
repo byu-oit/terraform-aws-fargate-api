@@ -46,12 +46,8 @@ output "cloudwatch_log_group" {
   value = aws_cloudwatch_log_group.container_log_group
 }
 
-output "autoscaling_step_up_policy" {
-  value = var.autoscaling_config != null ? aws_appautoscaling_policy.up : null
-}
-
-output "autoscaling_step_down_policy" {
-  value = var.autoscaling_config != null ? aws_appautoscaling_policy.down : null
+output "autoscaling_policy" {
+  value = var.autoscaling_config != null ? aws_appautoscaling_policy.default[0] : null
 }
 
 output "task_role" {
