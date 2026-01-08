@@ -41,6 +41,17 @@ module "fargate_api" {
     }
   }
 
+  task_cpu       = 256
+  task_memory    = 512
+  autoscaling_config = {
+    max_capacity = 10
+    min_capacity = 1
+    target_metric = "ALBRequestCountPerTarget"
+    target_value = 10
+    scale_in_cooldown = 120 # 2 min
+    scale_out_cooldown = 30 # 30 sec
+  }
+
   codedeploy_test_listener_port = 8443
   codedeploy_lifecycle_hooks = {
     AfterAllowTestTraffic = "testLifecycle"

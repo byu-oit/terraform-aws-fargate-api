@@ -631,6 +631,9 @@ resource "aws_appautoscaling_policy" "default" {
   target_tracking_scaling_policy_configuration {
     predefined_metric_specification {
       predefined_metric_type = var.autoscaling_config.target_metric
+
+      # TODO can't find a good way to choose the right target group, this could be bad if the scaling is based on the inactive target group
+      resource_label = "${aws_alb.alb.arn_suffix}/${aws_alb_target_group.blue.arn_suffix}"
     }
     target_value       = var.autoscaling_config.target_value
     scale_in_cooldown  = var.autoscaling_config.scale_in_cooldown
