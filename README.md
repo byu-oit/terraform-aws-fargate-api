@@ -51,6 +51,9 @@ module "my_app" {
   }
 }
 ```
+> **Note**
+> * If your application's `site_url` is a subdomain within your AWS account's default hosted zone, you must input both the default `hosted_zone` and `https_certificate_arn` from the [terraform-aws-acs-info module's](https://github.com/byu-oit/terraform-aws-acs-info) output. This is shown in the example above.
+> * If your application requires a custom `site_url` outside of your AWS account's default hosted zone, input your custom `hosted_zone` and do not input `https_certificate_arn`. The module will create an ACM certificate for your custom domain.
 
 ## Created Resources
 
@@ -67,6 +70,8 @@ module "my_app" {
     * with IAM role
 * CodeDeploy Group
 * DNS A-Record
+* HTTPS Certificate (if not provided)
+  * with DNS validation record
 * AutoScaling Target
 * AutoScaling Policy
 * CloudWatch Metric Alarms - Managed by AWS as a part of the Scaling Policy, and not by Terraform directly
@@ -101,6 +106,7 @@ module "my_app" {
 | alb_internal_flag                 | bool                                        | Marks an ALB as Internal (Inaccessible to public internet)                                                                                                                                                                                                                                                                                                                                           | false                                                                                  |
 | alb_sg_ingress_cidrs              | list(string)                                | List of cidrs to allow alb ingress for                                                                                                                                                                                                                                                                                                                                                               | ["0.0.0.0/0"]                                                                          |
 | alb_sg_ingress_sg_ids             | list(string)                                | List of security groups to allow ingress                                                                                                                                                                                                                                                                                                                                                             | []                                                                                     |
+| alb_idle_timeout                  | number                                      | The time in seconds that the connection is allowed to be idle. Defaults to 60 seconds.                                                                                                                                                                                                                                                                                                               |
 | private_subnet_ids                | list(string)                                | List of subnet IDs for the fargate service                                                                                                                                                                                                                                                                                                                                                           |                                                                                        |
 | codedeploy_service_role_arn       | string                                      | ARN of the IAM Role for the CodeDeploy to use to initiate new deployments. (usually the PowerBuilder Role)                                                                                                                                                                                                                                                                                           |                                                                                        |
 | codedeploy_termination_wait_time  | number                                      | the number of minutes to wait after a successful blue/green deployment before terminating instances from the original environment                                                                                                                                                                                                                                                                    | 15                                                                                     |
@@ -123,6 +129,24 @@ module "my_app" {
 | fargate_platform_version          | string                                      | Version of the Fargate platform to run.                                                                                                                                                                                                                                                                                                                                                              | 1.4.0                                                                                  |
 | xray_enabled                      | bool                                        | Whether or not the X-Ray daemon should be created with the Fargate API.                                                                                                                                                                                                                                                                                                                              | false                                                                                  |
 
+#### existing_ecs_cluster
+Object with following attributes to define an existing ECS cluster to deploy the fargate tasks.
+* **`arn`** - (Required) string of the ARN of the existing ECS cluster
+* **`name`** - (Required) string of the name of the existing ECS cluster
+
+If you want to deploy this scheduled fargate task onto an existing cluster you would need to define this variable. For example:
+```hcl
+module "test_api" {
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.3.1"
+  app_name             = "example-api"
+  existing_ecs_cluster = {
+    arn  = aws_ecs_cluster.my_cluster.arn
+    name = aws_ecs_cluster.my_cluster.name
+  }
+  // ...
+}
+```
+
 #### container_definition
 
 Object with following attributes to define the docker container(s) your fargate needs to run.
@@ -130,6 +154,8 @@ Object with following attributes to define the docker container(s) your fargate 
 * **`name`** - (Required) container name (referenced in CloudWatch logs, and possibly by other containers)
 * **`image`** - (Required) the ecr_image_url with the tag like: `<acct_num>.dkr.ecr.us-west-2.amazonaws.com/myapp:dev`
   or the image URL from dockerHub or some other docker registry
+* **`entryPoint`** - the [entrypoint](https://docs.docker.com/engine/reference/run/#entrypoint-default-command-to-execute-at-runtime) to run the docker container with. Can omit or set to `null` to use the default container command.
+* **`command`** - the [command](https://docs.docker.com/engine/reference/run/#cmd-default-command-or-options) to run the docker container with. Can omit or set to `null` to use the default container command.
 * **`ports`** - (Required) a list of ports this container is listening on
 * **`environment_variables`** - a map of environment variables to pass to the docker container
 * **`secrets`** - a map of secrets from the parameter store to be assigned to env variables
@@ -239,22 +265,23 @@ with the container logs in `example-api/example/12d344fd34b556ae4326...`
 
 ## Outputs
 
-| Name                           | Type                                                                                                                | Description                                                                                    |
-|--------------------------------|---------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| fargate_service                | [object](https://www.terraform.io/docs/providers/aws/r/ecs_service.html#attributes-reference)                       | Fargate ECS Service object                                                                     |
-| ecs_cluster                    | [object](https://www.terraform.io/docs/providers/aws/r/ecs_cluster.html#attributes-reference)                       | ECS Cluster (created or pre-existing) the service is deployed on                               |
-| fargate_service_security_group | [object](https://www.terraform.io/docs/providers/aws/r/security_group.html#attributes-reference)                    | Security Group object assigned to the Fargate service                                          |
-| task_definition                | [object](https://www.terraform.io/docs/providers/aws/r/ecs_task_definition.html#attributes-reference)               | The task definition object of the fargate service                                              |
-| codedeploy_deployment_group    | [object](https://www.terraform.io/docs/providers/aws/r/codedeploy_deployment_group.html#attributes-reference)       | The CodeDeploy deployment group object.                                                        |
-| codedeploy_appspec_json_file   | string                                                                                                              | Filename of the generated appspec.json file                                                    |
-| alb                            | [object](https://www.terraform.io/docs/providers/aws/r/lb.html#attributes-reference)                                | The Application Load Balancer (ALB) object                                                     |
-| alb_target_group_blue          | [object](https://www.terraform.io/docs/providers/aws/r/lb_target_group.html#attributes-reference)                   | The Application Load Balancer Target Group (ALB Target Group) object for the blue deployment   |
-| alb_target_group_green         | [object](https://www.terraform.io/docs/providers/aws/r/lb_target_group.html#attributes-reference)                   | The Application Load Balancer Target Group (ALB Target Group) object  for the green deployment |
-| alb_security_group             | [object](https://www.terraform.io/docs/providers/aws/r/security_group.html#attributes-reference)                    | The ALB's security group object                                                                |
-| dns_record                     | [object](https://www.terraform.io/docs/providers/aws/r/route53_record.html#attributes-reference)                    | The DNS A-record mapped to the ALB                                                             | 
-| autoscaling_policy             | [object](https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#attributes-reference)                | Autoscaling policy to step up                                                                  |
-| task_role                      | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | IAM role created for the tasks.                                                                |
-| task_execution_role            | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | IAM role created for the execution of tasks.                                                   |
+| Name                           | Type                                                                                                                | Description                                                                                                         |
+|--------------------------------|---------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| fargate_service                | [object](https://www.terraform.io/docs/providers/aws/r/ecs_service.html#attributes-reference)                       | Fargate ECS Service object                                                                                          |
+| new_ecs_cluster                | [object](https://www.terraform.io/docs/providers/aws/r/ecs_cluster.html#attributes-reference)                       | Newly created ECS Cluster the service is deployed on, if var.existing_ecs_cluster is provided this will return null |
+| fargate_service_security_group | [object](https://www.terraform.io/docs/providers/aws/r/security_group.html#attributes-reference)                    | Security Group object assigned to the Fargate service                                                               |
+| task_definition                | [object](https://www.terraform.io/docs/providers/aws/r/ecs_task_definition.html#attributes-reference)               | The task definition object of the fargate service                                                                   |
+| codedeploy_deployment_group    | [object](https://www.terraform.io/docs/providers/aws/r/codedeploy_deployment_group.html#attributes-reference)       | The CodeDeploy deployment group object.                                                                             |
+| codedeploy_appspec_json_file   | string                                                                                                              | Filename of the generated appspec.json file                                                                         |
+| alb                            | [object](https://www.terraform.io/docs/providers/aws/r/lb.html#attributes-reference)                                | The Application Load Balancer (ALB) object                                                                          |
+| alb_target_group_blue          | [object](https://www.terraform.io/docs/providers/aws/r/lb_target_group.html#attributes-reference)                   | The Application Load Balancer Target Group (ALB Target Group) object for the blue deployment                        |
+| alb_target_group_green         | [object](https://www.terraform.io/docs/providers/aws/r/lb_target_group.html#attributes-reference)                   | The Application Load Balancer Target Group (ALB Target Group) object  for the green deployment                      |
+| alb_security_group             | [object](https://www.terraform.io/docs/providers/aws/r/security_group.html#attributes-reference)                    | The ALB's security group object                                                                                     |
+| dns_record                     | [object](https://www.terraform.io/docs/providers/aws/r/route53_record.html#attributes-reference)                    | The DNS A-record mapped to the ALB                                                                                  |
+| cloudwatch_log_group           | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group#attributes-reference)                   | The CloudWatch Log group for the fargate service                                                                    |
+| autoscaling_policy             | [object](https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#attributes-reference)                | Autoscaling policy to step up                                                                                       |
+| task_role                      | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | IAM role created for the tasks.                                                                                     |
+| task_execution_role            | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | IAM role created for the execution of tasks.                                                                        |
 
 #### appspec
 

@@ -6,6 +6,8 @@ variable "primary_container_definition" {
   type = object({
     name                  = string
     image                 = string
+    entry_point           = optional(list(string))
+    command               = optional(list(string))
     ports                 = list(number)
     environment_variables = optional(map(string))
     secrets               = optional(map(string))
@@ -27,6 +29,8 @@ variable "extra_container_definitions" {
   type = list(object({
     name                  = string
     image                 = string
+    entry_point           = optional(list(string))
+    command               = optional(list(string))
     ports                 = list(number)
     environment_variables = optional(map(string))
     secrets               = optional(map(string))
@@ -140,7 +144,11 @@ variable "alb_sg_ingress_sg_ids" {
   description = "List of security groups to allow ingress"
   default     = []
 }
-
+variable "alb_idle_timeout" {
+  type        = number
+  description = "The time in seconds that the connection is allowed to be idle. Defaults to 60 seconds."
+  default     = null
+}
 variable "private_subnet_ids" {
   type        = list(string)
   description = "List of subnet IDs for the fargate service."
@@ -209,7 +217,8 @@ variable "hosted_zone" {
 }
 variable "https_certificate_arn" {
   type        = string
-  description = "ARN of the HTTPS certificate of the hosted zone/domain."
+  default     = null
+  description = "ARN of the HTTPS certificate of the hosted zone/domain. Defaults to creating its own certificate."
 }
 variable "autoscaling_config" {
   type = object({

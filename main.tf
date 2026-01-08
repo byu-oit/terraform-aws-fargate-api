@@ -9,9 +9,10 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  create_new_cluster = var.existing_ecs_cluster == null ? true : false
-  cluster_name       = local.create_new_cluster ? var.app_name : var.existing_ecs_cluster.name
-  definitions        = concat([var.primary_container_definition], var.extra_container_definitions)
+  create_new_cluster    = var.existing_ecs_cluster == null ? true : false
+  create_new_https_cert = var.https_certificate_arn == null ? true : false
+  cluster_name          = local.create_new_cluster ? var.app_name : var.existing_ecs_cluster.name
+  definitions           = concat([var.primary_container_definition], var.extra_container_definitions)
   volumes = distinct(flatten([
     for def in local.definitions :
     def.efs_volume_mounts != null ? def.efs_volume_mounts : []
@@ -37,6 +38,8 @@ locals {
     for def in local.definitions : {
       name       = def.name
       image      = def.image
+      entryPoint = def.entry_point
+      command    = def.command
       essential  = true
       privileged = false
       portMappings = [
@@ -91,6 +94,8 @@ locals {
   xray_container = [{
     name       = "${var.app_name}-xray"
     image      = "public.ecr.aws/xray/aws-xray-daemon:3.x"
+    entryPoint = []
+    command    = []
     essential  = true
     privileged = false
     portMappings = [{
@@ -139,11 +144,12 @@ locals {
 # ==================== ALB ====================
 resource "aws_alb" "alb" {
   name                   = local.alb_name
-  desync_mitigation_mode = "strictest"
+  desync_mitigation_mode = "defensive"
   subnets                = var.public_subnet_ids
   security_groups        = [aws_security_group.alb-sg.id]
   tags                   = var.tags
   internal               = var.alb_internal_flag
+  idle_timeout           = var.alb_idle_timeout
 
   access_logs {
     bucket  = var.lb_logging_bucket_name
@@ -245,7 +251,7 @@ resource "aws_alb_listener" "https" {
   load_balancer_arn = aws_alb.alb.arn
   port              = 443
   protocol          = "HTTPS"
-  certificate_arn   = var.https_certificate_arn
+  certificate_arn   = local.create_new_https_cert ? aws_acm_certificate_validation.new_cert[0].certificate_arn : var.https_certificate_arn # if cert is not provided use created one, else use existing cert
   default_action {
     type = "forward"
     forward {
@@ -285,7 +291,7 @@ resource "aws_alb_listener" "test_listener" {
   load_balancer_arn = aws_alb.alb.arn
   port              = var.codedeploy_test_listener_port
   protocol          = "HTTPS"
-  certificate_arn   = var.https_certificate_arn
+  certificate_arn   = local.create_new_https_cert ? aws_acm_certificate_validation.new_cert[0].certificate_arn : var.https_certificate_arn # if cert is not provided use created one, else use existing cert
   default_action {
     type = "forward"
     forward {
@@ -306,6 +312,19 @@ resource "aws_alb_listener" "test_listener" {
     aws_alb_target_group.blue,
     aws_alb_target_group.green
   ]
+}
+
+# ==================== HTTPS cert ====================
+resource "aws_acm_certificate" "new_cert" {
+  count             = local.create_new_https_cert ? 1 : 0 # if https cert is not provided, then create one
+  domain_name       = local.app_domain_url
+  validation_method = "DNS"
+}
+
+resource "aws_acm_certificate_validation" "new_cert" {
+  count                   = local.create_new_https_cert ? 1 : 0 # if https cert is not provided, then create a validation
+  certificate_arn         = aws_acm_certificate.new_cert[0].arn
+  validation_record_fqdns = [for record in aws_route53_record.new_cert_validation : record.fqdn]
 }
 
 # ==================== Route53 ====================
@@ -330,6 +349,21 @@ resource "aws_route53_record" "aaaa_record" {
     name                   = aws_alb.alb.dns_name
     zone_id                = aws_alb.alb.zone_id
   }
+}
+resource "aws_route53_record" "new_cert_validation" {
+  for_each = local.create_new_https_cert ? { # if https cert is not provided, then create validation records
+    for dvo in aws_acm_certificate.new_cert[0].domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  } : {}
+
+  name    = each.value.name
+  type    = each.value.type
+  zone_id = var.hosted_zone.id
+  records = [each.value.record]
+  ttl     = 60
 }
 
 # ==================== Task Definition ====================
@@ -426,6 +460,7 @@ resource "aws_ecs_task_definition" "task_def" {
     cpu_architecture        = var.cpu_architecture
   }
   requires_compatibilities = ["FARGATE"]
+  skip_destroy             = true
   execution_role_arn       = aws_iam_role.task_execution_role.arn
   task_role_arn            = aws_iam_role.task_role.arn
   tags                     = var.tags
@@ -474,6 +509,7 @@ resource "aws_ecs_service" "service" {
   desired_count    = var.autoscaling_config != null ? var.autoscaling_config.min_capacity : 1
   launch_type      = "FARGATE"
   platform_version = var.fargate_platform_version
+  propagate_tags   = "TASK_DEFINITION"
   deployment_controller {
     type = "CODE_DEPLOY"
   }
@@ -500,6 +536,11 @@ resource "aws_ecs_service" "service" {
       network_configuration // ignore because it has to be managed by codedeploy
     ]
   }
+  // If the target groups get re-created, the service needs to be re-created or CodeDeploy will fail
+  depends_on = [
+    aws_alb_target_group.blue,
+    aws_alb_target_group.green
+  ]
 }
 
 # ==================== CodeDeploy ====================
