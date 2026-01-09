@@ -1,7 +1,7 @@
 terraform {
   required_version = ">= 1.3.0"
   required_providers {
-    aws = ">= 4.0"
+    aws = ">= 6.0"
   }
 }
 
@@ -22,7 +22,7 @@ locals {
     values(def.secrets != null ? def.secrets : {})
   ]))
   has_secrets            = length(local.ssm_parameters) > 0
-  ssm_parameter_arn_base = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/"
+  ssm_parameter_arn_base = "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter/"
   secrets_arns = [
     for param in local.ssm_parameters :
     "${local.ssm_parameter_arn_base}${replace(param, "/^//", "")}"
@@ -54,7 +54,7 @@ locals {
         logDriver = "awslogs"
         options = {
           awslogs-group         = local.cloudwatch_log_group_name
-          awslogs-region        = data.aws_region.current.name
+          awslogs-region        = data.aws_region.current.region
           awslogs-stream-prefix = local.service_name
         }
       }
@@ -107,7 +107,7 @@ locals {
       logDriver = "awslogs"
       options = {
         awslogs-group         = local.xray_cloudwatch_log_group_name
-        awslogs-region        = data.aws_region.current.name
+        awslogs-region        = data.aws_region.current.region
         awslogs-stream-prefix = "${local.service_name}-xray"
       }
     }
@@ -118,27 +118,6 @@ locals {
     ulimits     = []
   }]
   container_definitions = var.xray_enabled == true ? concat(local.user_containers, local.xray_container) : local.user_containers
-
-  hooks = var.codedeploy_lifecycle_hooks != null ? setsubtract([
-    for hook in keys(var.codedeploy_lifecycle_hooks) :
-    zipmap([hook], [lookup(var.codedeploy_lifecycle_hooks, hook, null)])
-    ], [
-    {
-      BeforeInstall = null
-    },
-    {
-      AfterInstall = null
-    },
-    {
-      AfterAllowTestTraffic = null
-    },
-    {
-      BeforeAllowTraffic = null
-    },
-    {
-      AfterAllowTraffic = null
-    }
-  ]) : null
 }
 
 # ==================== ALB ====================
@@ -179,10 +158,10 @@ resource "aws_security_group" "alb-sg" {
   }
   // if test listener port is specified, allow traffic
   dynamic "ingress" {
-    for_each = var.codedeploy_test_listener_port != null ? [1] : []
+    for_each = var.test_listener_port != null ? [1] : []
     content {
-      from_port       = var.codedeploy_test_listener_port
-      to_port         = var.codedeploy_test_listener_port
+      from_port       = var.test_listener_port
+      to_port         = var.test_listener_port
       protocol        = "tcp"
       cidr_blocks     = var.alb_sg_ingress_cidrs
       security_groups = var.alb_sg_ingress_sg_ids
@@ -253,6 +232,30 @@ resource "aws_alb_listener" "https" {
   protocol          = "HTTPS"
   certificate_arn   = local.create_new_https_cert ? aws_acm_certificate_validation.new_cert[0].certificate_arn : var.https_certificate_arn # if cert is not provided use created one, else use existing cert
   default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      status_code  = "404"
+      content_type = "text/plain"
+      message_body = "No matching rule"
+    }
+  }
+  # lifecycle {
+  #   // CodeDeploy will switch the target groups back and forth for the listener, so ignore them and let CodeDeploy manage target groups
+  #   ignore_changes = [
+  #     default_action[0].target_group_arn,
+  #     default_action[0].forward[0].target_group
+  #   ]
+  # }
+  depends_on = [
+    aws_alb_target_group.blue,
+    aws_alb_target_group.green
+  ]
+}
+resource "aws_alb_listener_rule" "https" {
+  listener_arn = aws_alb_listener.https.arn
+  priority = 1
+  action {
     type = "forward"
     forward {
       target_group {
@@ -261,17 +264,17 @@ resource "aws_alb_listener" "https" {
       }
     }
   }
+  condition {
+    path_pattern {
+      values = ["/*"]
+    }
+  }
   lifecycle {
     // CodeDeploy will switch the target groups back and forth for the listener, so ignore them and let CodeDeploy manage target groups
     ignore_changes = [
-      default_action[0].target_group_arn,
-      default_action[0].forward[0].target_group
+      action[0].forward[0].target_group
     ]
   }
-  depends_on = [
-    aws_alb_target_group.blue,
-    aws_alb_target_group.green
-  ]
 }
 resource "aws_alb_listener" "http_to_https" {
   load_balancer_arn = aws_alb.alb.arn
@@ -287,18 +290,18 @@ resource "aws_alb_listener" "http_to_https" {
   }
 }
 resource "aws_alb_listener" "test_listener" {
-  count             = var.codedeploy_test_listener_port != null ? 1 : 0
+  count             = var.test_listener_port != null ? 1 : 0
   load_balancer_arn = aws_alb.alb.arn
-  port              = var.codedeploy_test_listener_port
+  port              = var.test_listener_port
   protocol          = "HTTPS"
   certificate_arn   = local.create_new_https_cert ? aws_acm_certificate_validation.new_cert[0].certificate_arn : var.https_certificate_arn # if cert is not provided use created one, else use existing cert
   default_action {
-    type = "forward"
-    forward {
-      target_group {
-        arn    = aws_alb_target_group.blue.arn
-        weight = 100
-      }
+    type = "fixed-response"
+
+    fixed_response {
+      status_code  = "404"
+      content_type = "text/plain"
+      message_body = "No matching rule"
     }
   }
   lifecycle {
@@ -312,6 +315,31 @@ resource "aws_alb_listener" "test_listener" {
     aws_alb_target_group.blue,
     aws_alb_target_group.green
   ]
+}
+resource "aws_alb_listener_rule" "test" {
+  count             = var.test_listener_port != null ? 1 : 0
+  listener_arn = aws_alb_listener.test_listener[0].arn
+  priority = 1
+  action {
+    type = "forward"
+    forward {
+      target_group {
+        arn    = aws_alb_target_group.green.arn
+        weight = 100
+      }
+    }
+  }
+  condition {
+    path_pattern {
+      values = ["/*"]
+    }
+  }
+  lifecycle {
+    // CodeDeploy will switch the target groups back and forth for the listener, so ignore them and let CodeDeploy manage target groups
+    ignore_changes = [
+      action[0].forward[0].target_group
+    ]
+  }
 }
 
 # ==================== HTTPS cert ====================
@@ -476,6 +504,30 @@ resource "aws_ecs_task_definition" "task_def" {
     }
   }
 }
+# --- ecs to access alb role ---
+data "aws_iam_policy_document" "ecs_to_alb" {
+  version = "2012-10-17"
+  statement {
+    effect = "Allow"
+    actions = [
+      "sts:AssumeRole"
+    ]
+    principals {
+      identifiers = ["ecs.amazonaws.com"]
+      type        = "Service"
+    }
+  }
+}
+resource "aws_iam_role" "ecs_to_alb" {
+  name                 = "${var.app_name}-ecsToAlb"
+  assume_role_policy   = data.aws_iam_policy_document.ecs_to_alb.json
+  permissions_boundary = var.role_permissions_boundary_arn
+  tags                 = var.tags
+}
+resource "aws_iam_role_policy_attachment" "ecs_to_alb" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonECSInfrastructureRolePolicyForLoadBalancers"
+  role       = aws_iam_role.ecs_to_alb.name
+}
 
 # ==================== Fargate ====================
 resource "aws_ecs_cluster" "new_cluster" {
@@ -510,9 +562,15 @@ resource "aws_ecs_service" "service" {
   launch_type      = "FARGATE"
   platform_version = var.fargate_platform_version
   propagate_tags   = "TASK_DEFINITION"
-  deployment_controller {
-    type = "CODE_DEPLOY"
+  deployment_configuration {
+    strategy = "BLUE_GREEN"
+    # type = "CODE_DEPLOY"
+    bake_time_in_minutes = "15"
   }
+  sigint_rollback = true
+  wait_for_steady_state = true
+  # force_new_deployment = true
+
   network_configuration {
     subnets         = var.private_subnet_ids
     security_groups = concat([aws_security_group.fargate_service_sg.id], var.security_groups)
@@ -522,6 +580,12 @@ resource "aws_ecs_service" "service" {
     target_group_arn = aws_alb_target_group.blue.arn
     container_name   = var.primary_container_definition.name
     container_port   = var.container_port
+    advanced_configuration {
+      alternate_target_group_arn = aws_alb_target_group.green.arn
+      production_listener_rule   = aws_alb_listener_rule.https.arn
+      test_listener_rule         = var.test_listener_port != null ? aws_alb_listener_rule.test[0].arn : null
+      role_arn                   = aws_iam_role.ecs_to_alb.arn
+    }
   }
 
   health_check_grace_period_seconds = var.health_check_grace_period
@@ -541,60 +605,6 @@ resource "aws_ecs_service" "service" {
     aws_alb_target_group.blue,
     aws_alb_target_group.green
   ]
-}
-
-# ==================== CodeDeploy ====================
-resource "aws_codedeploy_app" "app" {
-  name             = "${var.app_name}-codedeploy"
-  compute_platform = "ECS"
-}
-
-resource "aws_codedeploy_deployment_group" "deploymentgroup" {
-  app_name               = aws_codedeploy_app.app.name
-  deployment_group_name  = "${var.app_name}-deployment-group"
-  service_role_arn       = var.codedeploy_service_role_arn
-  deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
-
-  ecs_service {
-    cluster_name = local.cluster_name
-    service_name = aws_ecs_service.service.name
-  }
-
-  blue_green_deployment_config {
-    deployment_ready_option {
-      action_on_timeout = "CONTINUE_DEPLOYMENT"
-    }
-    terminate_blue_instances_on_deployment_success {
-      action                           = "TERMINATE"
-      termination_wait_time_in_minutes = var.codedeploy_termination_wait_time
-    }
-  }
-
-  deployment_style {
-    deployment_option = "WITH_TRAFFIC_CONTROL"
-    deployment_type   = "BLUE_GREEN"
-  }
-  auto_rollback_configuration {
-    enabled = true
-    events  = ["DEPLOYMENT_FAILURE"]
-  }
-
-  load_balancer_info {
-    target_group_pair_info {
-      prod_traffic_route {
-        listener_arns = [aws_alb_listener.https.arn]
-      }
-      test_traffic_route {
-        listener_arns = var.codedeploy_test_listener_port != null ? [aws_alb_listener.test_listener[0].arn] : []
-      }
-      target_group {
-        name = aws_alb_target_group.blue.name
-      }
-      target_group {
-        name = aws_alb_target_group.green.name
-      }
-    }
-  }
 }
 
 # ==================== CloudWatch ====================
@@ -690,31 +700,3 @@ resource "aws_cloudwatch_metric_alarm" "down" {
   tags                = var.tags
 }
 
-# ==================== AppSpec file ====================
-resource "local_file" "appspec_json" {
-  filename = var.appspec_filename != null ? var.appspec_filename : "${path.cwd}/appspec.json"
-  content = jsonencode({
-    version = 1
-    Resources = [{
-      TargetService = {
-        Type = "AWS::ECS::SERVICE"
-        Properties = {
-          TaskDefinition = aws_ecs_task_definition.task_def.arn
-          LoadBalancerInfo = {
-            ContainerName = var.primary_container_definition.name
-            ContainerPort = var.container_port
-          }
-          PlatformVersion = var.fargate_platform_version
-          NetworkConfiguration = {
-            AwsvpcConfiguration = {
-              Subnets        = var.private_subnet_ids
-              SecurityGroups = concat([aws_security_group.fargate_service_sg.id], var.security_groups)
-              AssignPublicIp = "DISABLED"
-            }
-          }
-        }
-      }
-    }],
-    Hooks = local.hooks
-  })
-}

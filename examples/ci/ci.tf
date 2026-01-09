@@ -55,7 +55,7 @@ module "fargate_api" {
   }
 
   autoscaling_config            = null
-  codedeploy_test_listener_port = 8443
+  test_listener_port = 8443
   codedeploy_lifecycle_hooks = {
     BeforeInstall         = null
     AfterInstall          = null
