@@ -561,7 +561,6 @@ resource "aws_ecs_service" "service" {
   }
   sigint_rollback       = true
   wait_for_steady_state = true
-  # force_new_deployment = true
 
   network_configuration {
     subnets         = var.private_subnet_ids
@@ -586,6 +585,7 @@ resource "aws_ecs_service" "service" {
 
   lifecycle {
     ignore_changes = [
+      // If we want terraform to run the deployment we just need to remove the task_definition from this ignore_changes list
       task_definition,      // ignore because new revisions will get added after blue-green deployment
       load_balancer,        // ignore because load balancer can change after blue-green deployment
       desired_count,        // ignore because we're assuming you have autoscaling to manage the container count
