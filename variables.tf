@@ -155,6 +155,11 @@ variable "private_subnet_ids" {
   type        = list(string)
   description = "List of subnet IDs for the fargate service."
 }
+variable "termination_wait_time" {
+  type        = number
+  description = "The number of minutes to wait after a successful blue/green deployment before terminating instances from the original environment. Defaults to 15"
+  default     = 15
+}
 variable "test_listener_port" {
   type        = number
   description = "The port for the test listener. This port will be used for test traffic on the new replacement set during the blue-green deployment process before shifting production traffic to the replacement set. Defaults to null"

@@ -4,7 +4,7 @@
 
 Terraform module pattern to build a standard Fargate API.
 
-This module creates a Fargate service with an ALB, AutoScaling, CodeDeploy configuration and a DNS record in front.
+This module creates a Fargate service with an ALB, AutoScaling, and a DNS record in front.
 
 **Note:** This module has many preset standards to make creating an API using Fargate easy. If you require a more
 customized solution you may need to use this code more as a pattern or guideline in how to build the resources you need.
@@ -13,13 +13,13 @@ customized solution you may need to use this code more as a pattern or guideline
 
 ```hcl
 module "my_app" {
-  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.3.1"
+  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v7.0.0"
   app_name                     = "example-api"
-  container_port               = 8000
+  container_port               = 80
   primary_container_definition = {
     name                  = "example"
-    image                 = "crccheck/hello-world"
-    ports                 = [8000]
+    image                 = "ngnix"
+    ports                 = [80]
     environment_variables = null
     secrets               = null
     efs_volume_mounts     = null
@@ -27,21 +27,13 @@ module "my_app" {
   }
 
   autoscaling_config            = null
-  codedeploy_test_listener_port = 8443
-  codedeploy_lifecycle_hooks    = {
-    BeforeInstall         = null
-    AfterInstall          = null
-    AfterAllowTestTraffic = "testLifecycle"
-    BeforeAllowTraffic    = null
-    AfterAllowTraffic     = null
-  }
+  test_listener_port = 8443
 
   hosted_zone                   = module.acs.route53_zone
   https_certificate_arn         = module.acs.certificate.arn
   public_subnet_ids             = module.acs.public_subnet_ids
   private_subnet_ids            = module.acs.private_subnet_ids
   vpc_id                        = module.acs.vpc.id
-  codedeploy_service_role_arn   = module.acs.power_builder_role.arn
   role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn
 
   tags = {
@@ -66,9 +58,6 @@ module "my_app" {
 * ALB
     * with security group
 * 2 Target Groups (for blue-green deployment)
-* CodeDeploy App
-    * with IAM role
-* CodeDeploy Group
 * DNS A-Record
 * HTTPS Certificate (if not provided)
   * with DNS validation record
@@ -108,18 +97,15 @@ module "my_app" {
 | alb_sg_ingress_sg_ids             | list(string)                                | List of security groups to allow ingress                                                                                                                                                                                                                                                                                                                                                             | []                                                                                     |
 | alb_idle_timeout                  | number                                      | The time in seconds that the connection is allowed to be idle. Defaults to 60 seconds.                                                                                                                                                                                                                                                                                                               |
 | private_subnet_ids                | list(string)                                | List of subnet IDs for the fargate service                                                                                                                                                                                                                                                                                                                                                           |                                                                                        |
-| codedeploy_service_role_arn       | string                                      | ARN of the IAM Role for the CodeDeploy to use to initiate new deployments. (usually the PowerBuilder Role)                                                                                                                                                                                                                                                                                           |                                                                                        |
-| codedeploy_termination_wait_time  | number                                      | the number of minutes to wait after a successful blue/green deployment before terminating instances from the original environment                                                                                                                                                                                                                                                                    | 15                                                                                     |
-| codedeploy_test_listener_port     | number                                      | The port for a codedeploy test listener. If provided CodeDeploy will use this port for test traffic on the new replacement set during the blue-green deployment process before shifting production traffic to the replacement set                                                                                                                                                                    | `null`                                                                                 |
-| codedeploy_lifecycle_hooks        | [object](#codedeploy_lifecycle_hooks)       | Define Lambda Functions for each CodeDeploy [lifecycle event hooks](https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html). Use the Lambda function names as the values. Omit or set specific hooks to `null` if you don't want to invoke a lambda function at that hook. Omit or set this variable to `null` to not have any lifecycle hooks invoked. | `null`                                                                                 |
-| appspec_filename                  | string                                      | Filename (including path) to use when outputing appspec json.                                                                                                                                                                                                                                                                                                                                        | `appspec.json` in the current working directory (i.e. where you ran `terraform apply`) |
+| termination_wait_time             | number                                      | the number of minutes to wait after a successful blue/green deployment before terminating instances from the original environment                                                                                                                                                                                                                                                                    | 15                                                                                     |
+| test_listener_port                | number                                      | The port for a codedeploy test listener. If provided ECS will use this port for test traffic on the new replacement set during the blue-green deployment process before shifting production traffic to the replacement set                                                                                                                                                                           | `null`                                                                                 |
 | role_permissions_boundary_arn     | string                                      | ARN of the IAM Role permissions boundary to place on each IAM role created                                                                                                                                                                                                                                                                                                                           |                                                                                        |
 | target_group_deregistration_delay | number                                      | Deregistration delay in seconds for ALB target groups                                                                                                                                                                                                                                                                                                                                                | 60                                                                                     |
 | target_group_sticky_sessions      | boolean                                     | Enables sticky sessions on the ALB target groups                                                                                                                                                                                                                                                                                                                                                     | false                                                                                  |
 | site_url                          | string                                      | The URL for the site.                                                                                                                                                                                                                                                                                                                                                                                | Concatenates app_name with hosted_zone_name.                                           |
 | overwrite_records                 | bool                                        | Allow creation of Route53 records in Terraform to overwrite an existing record, if any.                                                                                                                                                                                                                                                                                                              | false                                                                                  |
 | hosted_zone                       | [object](#hosted_zone)                      | Hosted Zone object to redirect to ALB. (Can pass in the aws_hosted_zone object). A and AAAA records created in this hosted zone                                                                                                                                                                                                                                                                      |                                                                                        |
-| https_certificate_arn             | string                                      | ARN of the HTTPS certificate of the hosted zone/domain. Defaults to creating its own certificate.                                                                                                                                                                                                                                                                                                    | `null`                                                                                  |
+| https_certificate_arn             | string                                      | ARN of the HTTPS certificate of the hosted zone/domain. Defaults to creating its own certificate.                                                                                                                                                                                                                                                                                                    | `null`                                                                                 |
 | autoscaling_config                | [object](#autoscaling_config)               | Configuration for default autoscaling policies and alarms. Additional advanced scaling options, which are optional, can be made with the "scaling_up_policy_config", "scaling_up_metric_alarm_config", "scaling_down_policy_config", and "scaling_down_metric_alarm_config" variables. Omit or set to `null` if you want to set up your own autoscaling policies and alarms.                         | `null`                                                                                 |
 | scaling_up_policy_config          | [object](#scaling_up_policy_config)         | Optional advanced configuration for the scaling up policy if 'autoscaling_config' is in use.                                                                                                                                                                                                                                                                                                         | See object definition [object](#scaling_up_policy_config)                              |                                                                        
 | scaling_up_metric_alarm_config    | [object](#scaling_up_metric_alarm_config)   | Optional advanced configuration for the scaling up metric alarm if 'autoscaling_config' is in use.                                                                                                                                                                                                                                                                                                   | See object definition [object](#scaling_up_metric_alarm_config)                        |                                                                        
@@ -141,7 +127,7 @@ Object with following attributes to define an existing ECS cluster to deploy the
 If you want to deploy this scheduled fargate task onto an existing cluster you would need to define this variable. For example:
 ```hcl
 module "test_api" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.3.1"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v7.0.0"
   app_name             = "example-api"
   existing_ecs_cluster = {
     arn  = aws_ecs_cluster.my_cluster.arn
@@ -214,21 +200,6 @@ See the following docs for more details:
 
 * https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ContainerDefinition.html
 * https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_Ulimit.html
-
-#### codedeploy_lifecycle_hooks
-
-This variable is used when generating the [appspec.json](#appspec) file. This will define what Lambda Functions to
-invoke at
-specific [lifecycle hooks](https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html)
-. Omit this variable or set it to `null` if you don't want to invoke any lambda functions. Omit or set a hook to `null` if you don't
-need that specific lifecycle hook function.
-
-* **`before_install`** - lambda function name to run before new task set is created
-* **`after_install`** - lambda function name to run after new task set is created before test traffic points to new task
-  set
-* **`after_allow_test_traffic`** - lambda function name to run after test traffic points to new task set
-* **`before_allow_traffic`** - lambda function name to run before public traffic points to new task set
-* **`after_allow_traffic`** - lambda function name to run after public traffic points to new task set
 
 #### hosted_zone
 
@@ -363,8 +334,6 @@ with the container logs in `example-api/example/12d344fd34b556ae4326...`
 | new_ecs_cluster                | [object](https://www.terraform.io/docs/providers/aws/r/ecs_cluster.html#attributes-reference)                       | Newly created ECS Cluster the service is deployed on, if var.existing_ecs_cluster is provided this will return null |
 | fargate_service_security_group | [object](https://www.terraform.io/docs/providers/aws/r/security_group.html#attributes-reference)                    | Security Group object assigned to the Fargate service                                                               |
 | task_definition                | [object](https://www.terraform.io/docs/providers/aws/r/ecs_task_definition.html#attributes-reference)               | The task definition object of the fargate service                                                                   |
-| codedeploy_deployment_group    | [object](https://www.terraform.io/docs/providers/aws/r/codedeploy_deployment_group.html#attributes-reference)       | The CodeDeploy deployment group object.                                                                             |
-| codedeploy_appspec_json_file   | string                                                                                                              | Filename of the generated appspec.json file                                                                         |
 | alb                            | [object](https://www.terraform.io/docs/providers/aws/r/lb.html#attributes-reference)                                | The Application Load Balancer (ALB) object                                                                          |
 | alb_target_group_blue          | [object](https://www.terraform.io/docs/providers/aws/r/lb_target_group.html#attributes-reference)                   | The Application Load Balancer Target Group (ALB Target Group) object for the blue deployment                        |
 | alb_target_group_green         | [object](https://www.terraform.io/docs/providers/aws/r/lb_target_group.html#attributes-reference)                   | The Application Load Balancer Target Group (ALB Target Group) object  for the green deployment                      |
@@ -376,98 +345,15 @@ with the container logs in `example-api/example/12d344fd34b556ae4326...`
 | task_role                      | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | IAM role created for the tasks.                                                                                     |
 | task_execution_role            | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | IAM role created for the execution of tasks.                                                                        |
 
-#### appspec
+## Blue-Green Deployment
 
-This module also creates a JSON file in the project directory: `appspec.json` used to initiate a CodeDeploy Deployment.
-
-Here's an example appspec.json file this creates:
-
-```json
-{
-  "Resources": [
-    {
-      "TargetService": {
-        "Properties": {
-          "LoadBalancerInfo": {
-            "ContainerName": "example",
-            "ContainerPort": 8000
-          },
-          "TaskDefinition": "arn:aws:ecs:us-west-2:123456789123:task-definition/example-api-def:2"
-        },
-        "Type": "AWS::ECS::SERVICE"
-      }
-    }
-  ],
-  "version": 1
-}
-```
-
-And example with [lifecycle hooks](#codedeploy_lifecycle_hooks):
-
-```json
-{
-  "Hooks": [
-    {
-      "BeforeInstall": null
-    },
-    {
-      "AfterInstall": "AfterInstallHookFunctionName"
-    },
-    {
-      "AfterAllowTestTraffic": "AfterAllowTestTrafficHookFunctionName"
-    },
-    {
-      "BeforeAllowTraffic": null
-    },
-    {
-      "AfterAllowTraffic": null
-    }
-  ],
-  "Resources": [
-    {
-      "TargetService": {
-        "Properties": {
-          "LoadBalancerInfo": {
-            "ContainerName": "example",
-            "ContainerPort": 8000
-          },
-          "TaskDefinition": "arn:aws:ecs:us-west-2:123456789123:task-definition/example-api-def:2"
-        },
-        "Type": "AWS::ECS::SERVICE"
-      }
-    }
-  ],
-  "version": 1
-}
-```
-
-## CodeDeploy Blue-Green Deployment
-
-This module creates a blue-green deployment process with CodeDeploy. If a `codedeploy_test_listener_port` is provided
+This module uses the blue-green deployment process with ECS. If a `test_listener_port` is provided
 this module will create an ALB listener that will allow public traffic from that port to the running fargate service.
 
-When a CodeDeploy deployment is initiated (either via a pipeline or manually) CodeDeploy will:
-
-1. call lambda function defined for `BeforeInstall` hook
-2. attempt to create a new set of tasks (called the replacement set) with the new task definition etc. in the unused ALB
-   Target Group
-3. call lambda function defined for `AfterInstall` hook
-4. associate the test listener (if defined) to the new target group
-5. call lambda function defined for `AfterAllowTestTraffic` hook
-6. call lambda function defined for `BeforeAllowTraffic` hook
-7. associate the production listener to the new target group
-8. call lambda function defined for `AfterAllowTraffic` hook
-9. wait for the `codedeploy_termination_wait_time` in minutes before destroying the original task set (this is useful if
-   you need to manually rollback)
-
-At any step (except step #1) the deployment can rollback (either manually or by the lambda functions in the lifecycle
-hooks or if there was an error trying to actually deploy)
+When a deployment is initiated (either via a pipeline or manually) ECS BlueGreen will:
 
 ##### TODO add diagrams to explain the blue-green deployment process
 
 ## Note
 
-If you require additional variables please create
-an [issue](https://github.com/byu-oit/terraform-aws-fargate-api/issues)
-and/or a [pull request](https://github.com/byu-oit/terraform-aws-fargate-api/pulls) to add the variable and reach out to
-the Terraform Working Group on slack (`#terraform` channel).
+If you require additional variables please create an [issue](https://github.com/byu-oit/terraform-aws-fargate-api/issues) and/or a [pull request](https://github.com/byu-oit/terraform-aws-fargate-api/pulls) to add the variable and reach out in the CES AWS channel.

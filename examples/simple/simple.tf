@@ -33,12 +33,6 @@ module "fargate_api" {
     name  = "example"
     image = "nginx"
     ports = [80]
-    environment_variables = {
-      env = "tst"
-    }
-    secrets = {
-      foo = "/super-secret"
-    }
   }
 
   test_listener_port = 8443
@@ -59,4 +53,12 @@ module "fargate_api" {
 
 output "url" {
   value = module.fargate_api.dns_record.fqdn
+}
+
+output "task_definition" {
+  value = "${module.fargate_api.task_definition.family}:${module.fargate_api.task_definition.revision}"
+}
+
+output "deploy_now_command" {
+  value = "aws ecs update-service --cluster ${aws_ecs_cluster.existing.name} --service ${module.fargate_api.fargate_service.name} --task-definition ${module.fargate_api.task_definition.family}:${module.fargate_api.task_definition.revision} --force-new-deployment"
 }

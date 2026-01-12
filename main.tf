@@ -240,13 +240,6 @@ resource "aws_alb_listener" "https" {
       message_body = "No matching rule"
     }
   }
-  # lifecycle {
-  #   // CodeDeploy will switch the target groups back and forth for the listener, so ignore them and let CodeDeploy manage target groups
-  #   ignore_changes = [
-  #     default_action[0].target_group_arn,
-  #     default_action[0].forward[0].target_group
-  #   ]
-  # }
   depends_on = [
     aws_alb_target_group.blue,
     aws_alb_target_group.green
@@ -270,7 +263,7 @@ resource "aws_alb_listener_rule" "https" {
     }
   }
   lifecycle {
-    // CodeDeploy will switch the target groups back and forth for the listener, so ignore them and let CodeDeploy manage target groups
+    // Blue/Green deployment will switch the target groups back and forth for the listener
     ignore_changes = [
       action[0].forward[0].target_group
     ]
@@ -305,7 +298,7 @@ resource "aws_alb_listener" "test_listener" {
     }
   }
   lifecycle {
-    // CodeDeploy will switch the target groups back and forth for the listener, so ignore them and let CodeDeploy manage target groups
+    // Blue/green deployment will switch the target groups back and forth for the listener
     ignore_changes = [
       default_action[0].target_group_arn,
       default_action[0].forward[0].target_group
@@ -335,7 +328,7 @@ resource "aws_alb_listener_rule" "test" {
     }
   }
   lifecycle {
-    // CodeDeploy will switch the target groups back and forth for the listener, so ignore them and let CodeDeploy manage target groups
+    // Blue/green deployment will switch the target groups back and forth for the listener
     ignore_changes = [
       action[0].forward[0].target_group
     ]
@@ -564,8 +557,7 @@ resource "aws_ecs_service" "service" {
   propagate_tags   = "TASK_DEFINITION"
   deployment_configuration {
     strategy = "BLUE_GREEN"
-    # type = "CODE_DEPLOY"
-    bake_time_in_minutes = "15"
+    bake_time_in_minutes = var.termination_wait_time
   }
   sigint_rollback = true
   wait_for_steady_state = true
@@ -594,13 +586,13 @@ resource "aws_ecs_service" "service" {
 
   lifecycle {
     ignore_changes = [
-      task_definition,      // ignore because new revisions will get added after code deploy's blue-green deployment
-      load_balancer,        // ignore because load balancer can change after code deploy's blue-green deployment
+      task_definition,      // ignore because new revisions will get added after blue-green deployment
+      load_balancer,        // ignore because load balancer can change after blue-green deployment
       desired_count,        // ignore because we're assuming you have autoscaling to manage the container count
-      network_configuration // ignore because it has to be managed by codedeploy
+      network_configuration // ignore because it has to be managed by blue-green deployment
     ]
   }
-  // If the target groups get re-created, the service needs to be re-created or CodeDeploy will fail
+  // If the target groups get re-created, the service needs to be re-created or blue/green deployment will fail
   depends_on = [
     aws_alb_target_group.blue,
     aws_alb_target_group.green
