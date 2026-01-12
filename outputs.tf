@@ -14,14 +14,6 @@ output "task_definition" {
   value = aws_ecs_task_definition.task_def
 }
 
-output "codedeploy_deployment_group" {
-  value = aws_codedeploy_deployment_group.deploymentgroup
-}
-
-output "codedeploy_appspec_json_file" {
-  value = local_file.appspec_json.filename
-}
-
 output "alb" {
   value = aws_alb.alb
 }

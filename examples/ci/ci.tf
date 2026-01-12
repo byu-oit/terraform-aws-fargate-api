@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.0"
+      version = "~> 6.0"
     }
   }
 }
@@ -54,22 +54,14 @@ module "fargate_api" {
     ]
   }
 
-  autoscaling_config            = null
-  codedeploy_test_listener_port = 8443
-  codedeploy_lifecycle_hooks = {
-    BeforeInstall         = null
-    AfterInstall          = null
-    AfterAllowTestTraffic = "testLifecycle"
-    BeforeAllowTraffic    = null
-    AfterAllowTraffic     = null
-  }
+  autoscaling_config = null
+  test_listener_port = 8443
 
   hosted_zone                   = module.acs.route53_zone
   https_certificate_arn         = module.acs.certificate.arn
   public_subnet_ids             = module.acs.public_subnet_ids
   private_subnet_ids            = module.acs.private_subnet_ids
   vpc_id                        = module.acs.vpc.id
-  codedeploy_service_role_arn   = module.acs.power_builder_role.arn
   role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn
   xray_enabled                  = true
 
@@ -97,14 +89,6 @@ output "fargate_service_security_group" {
 
 output "task_definition" {
   value = module.fargate_api.task_definition.arn
-}
-
-output "codedeploy_deployment_group" {
-  value = module.fargate_api.codedeploy_deployment_group.id
-}
-
-output "codedeploy_appspec_json_file" {
-  value = module.fargate_api.codedeploy_appspec_json_file
 }
 
 output "alb" {
