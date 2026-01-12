@@ -35,7 +35,8 @@ module "fargate_api" {
     ports = [80]
   }
 
-  test_listener_port = 8443
+  test_listener_port    = 8443
+  termination_wait_time = 1
 
   hosted_zone                   = module.acs.route53_zone
   https_certificate_arn         = module.acs.certificate.arn

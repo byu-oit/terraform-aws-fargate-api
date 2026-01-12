@@ -247,7 +247,7 @@ resource "aws_alb_listener" "https" {
 }
 resource "aws_alb_listener_rule" "https" {
   listener_arn = aws_alb_listener.https.arn
-  priority = 1
+  priority     = 1
   action {
     type = "forward"
     forward {
@@ -310,9 +310,9 @@ resource "aws_alb_listener" "test_listener" {
   ]
 }
 resource "aws_alb_listener_rule" "test" {
-  count             = var.test_listener_port != null ? 1 : 0
+  count        = var.test_listener_port != null ? 1 : 0
   listener_arn = aws_alb_listener.test_listener[0].arn
-  priority = 1
+  priority     = 1
   action {
     type = "forward"
     forward {
@@ -556,10 +556,10 @@ resource "aws_ecs_service" "service" {
   platform_version = var.fargate_platform_version
   propagate_tags   = "TASK_DEFINITION"
   deployment_configuration {
-    strategy = "BLUE_GREEN"
+    strategy             = "BLUE_GREEN"
     bake_time_in_minutes = var.termination_wait_time
   }
-  sigint_rollback = true
+  sigint_rollback       = true
   wait_for_steady_state = true
   # force_new_deployment = true
 
