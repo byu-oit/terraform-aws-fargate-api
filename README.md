@@ -13,7 +13,7 @@ customized solution you may need to use this code more as a pattern or guideline
 
 ```hcl
 module "my_app" {
-  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.3.1"
+  source                       = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.4.0"
   app_name                     = "example-api"
   container_port               = 8000
   primary_container_definition = {
@@ -107,6 +107,7 @@ module "my_app" {
 | alb_sg_ingress_cidrs              | list(string)                                | List of cidrs to allow alb ingress for                                                                                                                                                                                                                                                                                                                                                               | ["0.0.0.0/0"]                                                                          |
 | alb_sg_ingress_sg_ids             | list(string)                                | List of security groups to allow ingress                                                                                                                                                                                                                                                                                                                                                             | []                                                                                     |
 | alb_idle_timeout                  | number                                      | The time in seconds that the connection is allowed to be idle. Defaults to 60 seconds.                                                                                                                                                                                                                                                                                                               |
+| ssl_policy                        | string                                      | The name of the SSL Policy for the ALB HTTPS listeners.                                                                                                                                                                                                                                                                                                                                              | "ELBSecurityPolicy-TLS13-1-2-2021-06"                                                  |
 | private_subnet_ids                | list(string)                                | List of subnet IDs for the fargate service                                                                                                                                                                                                                                                                                                                                                           |                                                                                        |
 | codedeploy_service_role_arn       | string                                      | ARN of the IAM Role for the CodeDeploy to use to initiate new deployments. (usually the PowerBuilder Role)                                                                                                                                                                                                                                                                                           |                                                                                        |
 | codedeploy_termination_wait_time  | number                                      | the number of minutes to wait after a successful blue/green deployment before terminating instances from the original environment                                                                                                                                                                                                                                                                    | 15                                                                                     |
@@ -141,7 +142,7 @@ Object with following attributes to define an existing ECS cluster to deploy the
 If you want to deploy this scheduled fargate task onto an existing cluster you would need to define this variable. For example:
 ```hcl
 module "test_api" {
-  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.3.1"
+  source = "github.com/byu-oit/terraform-aws-fargate-api?ref=v6.4.0"
   app_name             = "example-api"
   existing_ecs_cluster = {
     arn  = aws_ecs_cluster.my_cluster.arn
