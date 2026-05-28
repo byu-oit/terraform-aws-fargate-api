@@ -151,6 +151,11 @@ variable "alb_idle_timeout" {
   description = "The time in seconds that the connection is allowed to be idle. Defaults to 60 seconds."
   default     = null
 }
+variable "ssl_policy" {
+  type        = string
+  description = "The name of the SSL Policy for the ALB HTTPS listeners."
+  default     = null
+}
 variable "private_subnet_ids" {
   type        = list(string)
   description = "List of subnet IDs for the fargate service."
