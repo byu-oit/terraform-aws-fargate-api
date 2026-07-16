@@ -34,6 +34,8 @@ locals {
   xray_cloudwatch_log_group_name = "${local.cloudwatch_log_group_name}-xray"
   service_name                   = var.app_name // ECS Service name
 
+  # health_check_port = var.health_check_port != null ? var.health_check_port : var.container_port // health check port defaults to same value as container port
+
   user_containers = [
     for def in local.definitions : {
       name       = def.name
@@ -211,6 +213,7 @@ resource "aws_alb_target_group" "blue" {
     enabled = var.target_group_sticky_sessions
   }
   health_check {
+    port                = var.health_check_port
     path                = var.health_check_path
     matcher             = var.health_check_matcher
     interval            = var.health_check_interval
@@ -236,6 +239,7 @@ resource "aws_alb_target_group" "green" {
     enabled = var.target_group_sticky_sessions
   }
   health_check {
+    port                = var.health_check_port
     path                = var.health_check_path
     matcher             = var.health_check_matcher
     interval            = var.health_check_interval
@@ -353,8 +357,8 @@ resource "aws_route53_record" "aaaa_record" {
   }
 }
 resource "aws_route53_record" "new_cert_validation" {
-  for_each = local.create_new_https_cert ? { # if https cert is not provided, then create validation records
-    for dvo in aws_acm_certificate.new_cert[0].domain_validation_options : dvo.domain_name => {
+  for_each = nonsensitive(local.create_new_https_cert) ? { # if https cert is not provided, then create validation records
+    for dvo in nonsensitive(aws_acm_certificate.new_cert[0].domain_validation_options) : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type

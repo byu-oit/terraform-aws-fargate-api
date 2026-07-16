@@ -28,11 +28,20 @@ module "fargate_api" {
     id   = aws_ecs_cluster.existing.id
     name = aws_ecs_cluster.existing.name
   }
-  container_port = 8000
+  container_port = 8080
+  health_check_port = 8081
   primary_container_definition = {
     name  = "example"
-    image = "crccheck/hello-world"
-    ports = [8000]
+    image = "registry.access.redhat.com/hi/nginx:latest"
+    ports = [8080, 8081]
+    efs_volume_mounts = [
+      {
+        name = "persistent_data"
+        file_system_id = aws_efs_file_system.example_mount.id
+        root_directory = "/nginx"
+        container_path = "/etc/nginx"
+      }
+    ]
     environment_variables = {
       env = "tst"
     }
@@ -59,6 +68,30 @@ module "fargate_api" {
     data-sensitivity = "internal"
     repo             = "https://github.com/byu-oit/terraform-aws-fargate-api"
   }
+}
+
+resource "aws_efs_file_system" "example_mount" {
+}
+
+resource "aws_security_group" "efs_sg" {
+  name        = "example-api-efs"
+  description = "EFS Mount for example-api"
+  vpc_id      = module.acs.vpc.id
+
+  ingress {
+    protocol        = "tcp"
+    from_port       = 2049
+    to_port         = 2049
+    security_groups = [module.fargate_api.fargate_service_security_group.id]
+  }
+}
+
+resource "aws_efs_mount_target" "efs_target" {
+  for_each = nonsensitive(toset(module.acs.private_subnet_ids))
+
+  file_system_id  = aws_efs_file_system.example_mount.id
+  subnet_id       = each.key
+  security_groups = [aws_security_group.efs_sg.id]
 }
 
 output "url" {

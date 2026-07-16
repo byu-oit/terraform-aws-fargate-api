@@ -61,6 +61,18 @@ variable "container_port" {
   type        = number
   description = "The port the primary docker container is listening on"
 }
+variable "health_check_port" {
+  type        = number
+  description = "The port for the health check. Defaults to the container_port."
+  default     = null
+  validation {
+    condition = (
+            var.health_check_port == null ||
+            (var.health_check_port >= 1 && var.health_check_port <= 65535)
+    )
+    error_message = "health_check_port must be null, or a numeric port between 1 and 65535"
+  }
+}
 variable "health_check_path" {
   type        = string
   description = "Health check path for the image. Defaults to \"/\"."
