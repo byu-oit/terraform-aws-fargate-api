@@ -25,12 +25,12 @@ module "fargate_api" {
   source   = "../../" // for local testing
   app_name = "example-api"
   container_port = 8080
-  # health_check_port = 8081
-  # health_check_path = "/health"
+  health_check_port = 8081
+  health_check_path = "/health"
   primary_container_definition = {
     name  = "example"
     image = "${data.aws_ecr_repository.my_ecr_repo.repository_url}:latest"
-    ports = [8080]
+    ports = [8080, 8081]
   }
 
   codedeploy_test_listener_port = 8443
