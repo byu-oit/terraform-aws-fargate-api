@@ -22,9 +22,9 @@ data "aws_ecr_repository" "my_ecr_repo" {
 }
 
 module "fargate_api" {
-  source   = "../../" // for local testing
-  app_name = "example-api"
-  container_port = 8080
+  source            = "../../" // for local testing
+  app_name          = "example-api"
+  container_port    = 8080
   health_check_port = 8081
   health_check_path = "/health"
   primary_container_definition = {
