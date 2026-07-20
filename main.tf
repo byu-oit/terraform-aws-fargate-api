@@ -34,8 +34,6 @@ locals {
   xray_cloudwatch_log_group_name = "${local.cloudwatch_log_group_name}-xray"
   service_name                   = var.app_name // ECS Service name
 
-  # health_check_port = var.health_check_port != null ? var.health_check_port : var.container_port // health check port defaults to same value as container port
-
   user_containers = [
     for def in local.definitions : {
       name       = def.name
