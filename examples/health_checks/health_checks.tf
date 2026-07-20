@@ -17,28 +17,20 @@ module "acs" {
   source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.5.0"
 }
 
-resource "aws_ecs_cluster" "existing" {
-  name = "fake-example-cluster"
+data "aws_ecr_repository" "my_ecr_repo" {
+  name = "tf_fargate_example_health_checks"
 }
+
 module "fargate_api" {
   source   = "../../" // for local testing
   app_name = "example-api"
-  existing_ecs_cluster = {
-    arn  = aws_ecs_cluster.existing.arn
-    id   = aws_ecs_cluster.existing.id
-    name = aws_ecs_cluster.existing.name
-  }
-  container_port = 8000
+  container_port = 8080
+  # health_check_port = 8081
+  # health_check_path = "/health"
   primary_container_definition = {
     name  = "example"
-    image = "crccheck/hello-world"
-    ports = [8000]
-    environment_variables = {
-      env = "tst"
-    }
-    secrets = {
-      foo = "/super-secret"
-    }
+    image = "${data.aws_ecr_repository.my_ecr_repo.repository_url}:latest"
+    ports = [8080]
   }
 
   codedeploy_test_listener_port = 8443
