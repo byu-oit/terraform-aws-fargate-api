@@ -60,6 +60,13 @@ variable "existing_ecs_cluster" {
 variable "container_port" {
   type        = number
   description = "The port the primary docker container is listening on"
+  // TODO add validation to ensure port is between acceptable numbers
+}
+variable "health_check_port" {
+  type        = number
+  description = "The port for the health check. Defaults to the container_port."
+  default     = null
+  // TODO add validation to ensure port is between acceptable numbers
 }
 variable "health_check_path" {
   type        = string

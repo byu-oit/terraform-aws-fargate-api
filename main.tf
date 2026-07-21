@@ -9,10 +9,15 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  create_new_cluster    = var.existing_ecs_cluster == null ? true : false
-  create_new_https_cert = var.https_certificate_arn == null ? true : false
-  cluster_name          = local.create_new_cluster ? var.app_name : var.existing_ecs_cluster.name
-  definitions           = concat([var.primary_container_definition], var.extra_container_definitions)
+  create_new_cluster = var.existing_ecs_cluster == null ? true : false
+
+  # https_certificate_arn could potentially contain sensitive values, so we wrap it with nonsensitive(), and a try() because it might not classify it as sensitive and return an error.
+  # this should make the local.create_new_https_cert a nonsensitive value that can be used in for_each loops
+  _create_new_https_cert = var.https_certificate_arn == null ? true : false
+  create_new_https_cert  = try(nonsensitive(local._create_new_https_cert), local._create_new_https_cert)
+
+  cluster_name = local.create_new_cluster ? var.app_name : var.existing_ecs_cluster.name
+  definitions  = concat([var.primary_container_definition], var.extra_container_definitions)
   volumes = distinct(flatten([
     for def in local.definitions :
     def.efs_volume_mounts != null ? def.efs_volume_mounts : []
@@ -28,8 +33,13 @@ locals {
     "${local.ssm_parameter_arn_base}${replace(param, "/^//", "")}"
   ]
 
-  alb_name                       = "${var.app_name}-alb"                                                           // ALB name has a restriction of 32 characters max
-  app_domain_url                 = var.site_url != null ? var.site_url : "${var.app_name}.${var.hosted_zone.name}" // Route53 A record name
+  alb_name = "${var.app_name}-alb"
+
+  # hosted_zone.name could potentially contain sensitive values, so we wrap it with nonsensitive(), and a try() because it might not classify it as sensitive and return an error.
+  # this should make the local.app_domain_url a nonsensitive value that can be used in for_each loops                                                      // ALB name has a restriction of 32 characters max
+  _app_domain_url = var.site_url != null ? var.site_url : "${var.app_name}.${var.hosted_zone.name}" // Route53 A record name
+  app_domain_url  = try(nonsensitive(local._app_domain_url), local._app_domain_url)
+
   cloudwatch_log_group_name      = length(var.log_group_name) > 0 ? var.log_group_name : "fargate/${var.app_name}" // CloudWatch Log Group name
   xray_cloudwatch_log_group_name = "${local.cloudwatch_log_group_name}-xray"
   service_name                   = var.app_name // ECS Service name
@@ -211,6 +221,7 @@ resource "aws_alb_target_group" "blue" {
     enabled = var.target_group_sticky_sessions
   }
   health_check {
+    port                = var.health_check_port
     path                = var.health_check_path
     matcher             = var.health_check_matcher
     interval            = var.health_check_interval
@@ -236,6 +247,7 @@ resource "aws_alb_target_group" "green" {
     enabled = var.target_group_sticky_sessions
   }
   health_check {
+    port                = var.health_check_port
     path                = var.health_check_path
     matcher             = var.health_check_matcher
     interval            = var.health_check_interval
@@ -353,19 +365,26 @@ resource "aws_route53_record" "aaaa_record" {
   }
 }
 resource "aws_route53_record" "new_cert_validation" {
-  for_each = local.create_new_https_cert ? { # if https cert is not provided, then create validation records
-    for dvo in aws_acm_certificate.new_cert[0].domain_validation_options : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
-  } : {}
+  # if https cert is not provided, then create validation records
+  for_each = local.create_new_https_cert ? toset([local.app_domain_url]) : toset([])
 
-  name    = each.value.name
-  type    = each.value.type
   zone_id = var.hosted_zone.id
-  records = [each.value.record]
-  ttl     = 60
+  name = one([
+    for dvo in aws_acm_certificate.new_cert[0].domain_validation_options :
+    dvo.resource_record_name
+    if dvo.domain_name == each.key
+  ])
+  type = one([
+    for dvo in aws_acm_certificate.new_cert[0].domain_validation_options :
+    dvo.resource_record_type
+    if dvo.domain_name == each.key
+  ])
+  records = [one([
+    for dvo in aws_acm_certificate.new_cert[0].domain_validation_options :
+    dvo.resource_record_value
+    if dvo.domain_name == each.key
+  ])]
+  ttl = 60
 }
 
 # ==================== Task Definition ====================
