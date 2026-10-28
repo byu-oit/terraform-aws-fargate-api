@@ -174,6 +174,7 @@ resource "aws_security_group" "alb-sg" {
 
   // allow access to the ALB from anywhere for 80 and 443
   ingress {
+    description     = "HTTP"
     from_port       = 80
     to_port         = 80
     protocol        = "tcp"
@@ -181,6 +182,7 @@ resource "aws_security_group" "alb-sg" {
     security_groups = var.alb_sg_ingress_sg_ids
   }
   ingress {
+    description     = "HTTPS"
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
@@ -191,6 +193,7 @@ resource "aws_security_group" "alb-sg" {
   dynamic "ingress" {
     for_each = var.codedeploy_test_listener_port != null ? [1] : []
     content {
+      description     = "CodeDeploy test listener"
       from_port       = var.codedeploy_test_listener_port
       to_port         = var.codedeploy_test_listener_port
       protocol        = "tcp"
@@ -200,6 +203,7 @@ resource "aws_security_group" "alb-sg" {
   }
   // allow any outgoing traffic
   egress {
+    description = "All outbound traffic"
     protocol    = "-1"
     from_port   = 0
     to_port     = 0
@@ -491,8 +495,9 @@ resource "aws_ecs_task_definition" "task_def" {
     content {
       name = volume.value.name
       efs_volume_configuration {
-        file_system_id = volume.value.file_system_id
-        root_directory = volume.value.root_directory
+        file_system_id     = volume.value.file_system_id
+        root_directory     = volume.value.root_directory
+        transit_encryption = "ENABLED"
       }
     }
   }
@@ -503,19 +508,26 @@ resource "aws_ecs_cluster" "new_cluster" {
   count = local.create_new_cluster ? 1 : 0 # if cluster is not provided create one
   name  = local.cluster_name
   tags  = var.tags
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
 }
+# trivy:ignore:AWS-0104 because applications choose their outbound dependencies
 resource "aws_security_group" "fargate_service_sg" {
   name        = "${var.app_name}-fargate-sg"
   description = "Controls access to the Fargate Service"
   vpc_id      = var.vpc_id
 
   ingress {
+    description     = "ALB to Fargate service"
     from_port       = 0
     to_port         = 65535
     protocol        = "tcp"
     security_groups = [aws_security_group.alb-sg.id]
   }
   egress {
+    description = "All outbound traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -619,11 +631,13 @@ resource "aws_codedeploy_deployment_group" "deploymentgroup" {
 }
 
 # ==================== CloudWatch ====================
+# trivy:ignore:AWS-0017
 resource "aws_cloudwatch_log_group" "container_log_group" {
   name              = local.cloudwatch_log_group_name
   retention_in_days = var.log_retention_in_days
   tags              = var.tags
 }
+# trivy:ignore:AWS-0017
 resource "aws_cloudwatch_log_group" "xray_log_group" {
   count             = (var.xray_enabled == true) ? 1 : 0
   name              = local.xray_cloudwatch_log_group_name
