@@ -266,19 +266,13 @@ resource "aws_alb_listener" "https" {
   ssl_policy        = var.ssl_policy
   certificate_arn   = local.create_new_https_cert ? aws_acm_certificate_validation.new_cert[0].certificate_arn : var.https_certificate_arn # if cert is not provided use created one, else use existing cert
   default_action {
-    type = "forward"
-    forward {
-      target_group {
-        arn    = aws_alb_target_group.blue.arn
-        weight = 100
-      }
-    }
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.blue.arn
   }
   lifecycle {
     // CodeDeploy will switch the target groups back and forth for the listener, so ignore them and let CodeDeploy manage target groups
     ignore_changes = [
-      default_action[0].target_group_arn,
-      default_action[0].forward[0].target_group
+      default_action[0].target_group_arn
     ]
   }
   depends_on = [
@@ -307,19 +301,13 @@ resource "aws_alb_listener" "test_listener" {
   ssl_policy        = var.ssl_policy
   certificate_arn   = local.create_new_https_cert ? aws_acm_certificate_validation.new_cert[0].certificate_arn : var.https_certificate_arn # if cert is not provided use created one, else use existing cert
   default_action {
-    type = "forward"
-    forward {
-      target_group {
-        arn    = aws_alb_target_group.blue.arn
-        weight = 100
-      }
-    }
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.blue.arn
   }
   lifecycle {
     // CodeDeploy will switch the target groups back and forth for the listener, so ignore them and let CodeDeploy manage target groups
     ignore_changes = [
-      default_action[0].target_group_arn,
-      default_action[0].forward[0].target_group
+      default_action[0].target_group_arn
     ]
   }
   depends_on = [
