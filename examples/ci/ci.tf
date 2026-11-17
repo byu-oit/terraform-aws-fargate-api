@@ -81,6 +81,7 @@ module "fargate_api" {
 }
 
 resource "aws_efs_file_system" "my_efs" {
+  encrypted = true
 }
 
 output "fargate_service" {
